@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сільпо — Вакансії</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#00a651;
+  --green-dark:#008c44;
+  --green-light:#e6f7ed;
+  --dark:#1a1a1a;
+  --text:#333;
+  --text-light:#666;
+  --bg:#fff;
+  --bg-light:#f5f5f5;
+  --border:#e0e0e0;
+  --red:#e30613;
+  --orange:#ff6b00;
+  --radius:12px;
+  --radius-sm:8px;
+  --radius-pill:50px;
+  --shadow:0 2px 12px rgba(0,0,0,.08);
+  --max-w:1200px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font:inherit;border:none;background:none}
+img{max-width:100%;display:block}
+ul{list-style:none}
+
+/* ===== HEADER ===== */
+.header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border)}
+.header-inner{max-width:var(--max-w);margin:0 auto;padding:0 24px;display:flex;align-items:center;height:60px;gap:16px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:#fff;background:var(--dark);padding:6px 18px;border-radius:var(--radius-pill);white-space:nowrap}
+.logo svg{width:20px;height:20px;fill:#fff}
+.header-search{flex:1;max-width:400px;position:relative}
+.header-search input{width:100%;padding:8px 16px 8px 36px;border:1px solid var(--border);border-radius:var(--radius-pill);font-size:14px;outline:none;transition:border-color .2s}
+.header-search input:focus{border-color:var(--green)}
+.header-search::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px}
+.header-right{display:flex;align-items:center;gap:16px;margin-left:auto;font-size:14px;color:var(--text-light)}
+.header-right .user{display:flex;align-items:center;gap:8px}
+.header-right .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid var(--border)}
+.nav-inner{max-width:var(--max-w);margin:0 auto;padding:0 24px;display:flex;gap:8px;overflow-x:auto}
+.nav a{display:block;padding:14px 16px;font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.nav a:hover,.nav a.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* ===== HERO ===== */
+.hero{background:linear-gradient(135deg,#004d25 0%,#00a651 60%,#33cc77 100%);color:#fff;padding:64px 0}
+.hero-inner{max-width:var(--max-w);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.hero h1{font-size:42px;line-height:1.15;font-weight:800;margin-bottom:16px}
+.hero p{font-size:18px;opacity:.9;margin-bottom:32px}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--green-dark);font-weight:700;font-size:16px;padding:14px 32px;border-radius:var(--radius-pill);transition:all .2s}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.hero-contacts{margin-top:24px;font-size:14px;opacity:.85;display:flex;flex-direction:column;gap:4px}
+.hero-image{display:flex;gap:12px;justify-content:center}
+.hero-image .card-preview{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border-radius:var(--radius);padding:20px;width:200px;border:1px solid rgba(255,255,255,.2)}
+.hero-image .card-preview h4{font-size:14px;margin-bottom:8px}
+.hero-image .card-preview .salary{color:#ffe082;font-weight:700;font-size:16px}
+
+/* ===== SEARCH BAR ===== */
+.search-section{max-width:var(--max-w);margin:-28px auto 0;padding:0 24px;position:relative;z-index:10}
+.search-bar{display:flex;gap:12px;background:#fff;padding:16px 24px;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+.search-bar input{flex:1;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:15px;outline:none;transition:border-color .2s}
+.search-bar input:focus{border-color:var(--green)}
+.search-bar .btn-search{background:var(--green);color:#fff;padding:12px 32px;border-radius:var(--radius-sm);font-weight:600;font-size:15px;transition:background .2s}
+.search-bar .btn-search:hover{background:var(--green-dark)}
+
+/* ===== SECTIONS ===== */
+.section{max-width:var(--max-w);margin:0 auto;padding:48px 24px}
+.section-title{font-size:28px;font-weight:800;margin-bottom:24px;color:var(--dark)}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.section-header .link-all{color:var(--green);font-weight:600;font-size:14px;display:flex;align-items:center;gap:4px}
+
+/* ===== CATEGORIES ===== */
+.categories{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px}
+.cat-card{border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;transition:all .2s;cursor:pointer;position:relative;overflow:hidden}
+.cat-card:hover{border-color:var(--green);box-shadow:0 4px 20px rgba(0,166,81,.12)}
+.cat-card .cat-icon{font-size:32px;margin-bottom:16px}
+.cat-card h3{font-size:20px;font-weight:700;margin-bottom:12px;color:var(--dark)}
+.cat-card .cat-list{color:var(--text-light);font-size:14px;line-height:1.8}
+.cat-card .cat-footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.cat-card .cat-count{font-weight:700;color:var(--dark)}
+.cat-card .cat-arrow{width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;transition:transform .2s}
+.cat-card:hover .cat-arrow{transform:translateX(4px)}
+
+/* ===== CITY PILLS ===== */
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:8px 20px;border-radius:var(--radius-pill);font-size:14px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--text);transition:all .2s}
+.pill:hover{border-color:var(--green);color:var(--green)}
+.pill.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ===== VACANCY CARDS ===== */
+.vacancies-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:20px}
+.vacancy-card{border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;transition:all .2s;cursor:pointer}
+.vacancy-card:hover{border-color:var(--green);box-shadow:0 4px 16px rgba(0,166,81,.1)}
+.vacancy-card .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tag{padding:4px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:500}
+.tag-cat{background:var(--green-light);color:var(--green-dark)}
+.tag-hot{background:#fff3e0;color:var(--orange)}
+.tag-warehouse{background:#e3f2fd;color:#1565c0}
+.vacancy-card h4{font-size:17px;font-weight:700;color:var(--dark);margin-bottom:8px}
+.vacancy-card .location{font-size:13px;color:var(--text-light);margin-bottom:12px}
+.vacancy-card .badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.badge{padding:4px 10px;border-radius:var(--radius-sm);font-size:12px;background:var(--bg-light);color:var(--text-light);border:1px solid var(--border)}
+.vacancy-card .salary{font-size:16px;font-weight:700;color:var(--green)}
+
+/* ===== SHOW MORE ===== */
+.btn-more{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:1px solid var(--border);border-radius:var(--radius);font-weight:600;color:var(--text);margin-top:20px;transition:all .2s}
+.btn-more:hover{border-color:var(--green);color:var(--green)}
+
+/* ===== COURIER SECTION ===== */
+.courier-section{background:var(--dark);color:#fff;border-radius:var(--radius);padding:48px;margin-top:48px}
+.courier-section .label{text-transform:uppercase;font-size:12px;letter-spacing:2px;color:var(--green);font-weight:600;margin-bottom:12px}
+.courier-section h2{font-size:32px;font-weight:800;margin-bottom:16px}
+.courier-section p{color:rgba(255,255,255,.7);margin-bottom:24px;max-width:640px}
+.courier-section ul{color:rgba(255,255,255,.75);font-size:14px;margin-bottom:32px}
+.courier-section ul li{padding:8px 0;padding-left:20px;position:relative}
+.courier-section ul li::before{content:'—';position:absolute;left:0}
+.courier-btn{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;padding:14px 32px;border-radius:var(--radius-pill);font-weight:700;font-size:15px;transition:all .2s}
+.courier-btn:hover{background:var(--green-dark);transform:translateY(-2px)}
+.courier-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:36px;padding-top:36px;border-top:1px solid rgba(255,255,255,.15)}
+.courier-stat .num{font-size:36px;font-weight:800;color:var(--green)}
+.courier-stat .desc{font-size:13px;color:rgba(255,255,255,.6);margin-top:4px}
+
+/* ===== BENEFITS ===== */
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.benefit-card{border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .2s}
+.benefit-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.benefit-card .benefit-icon{width:40px;height:40px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+.benefit-card h4{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--dark)}
+.benefit-card p{font-size:13px;color:var(--text-light)}
+
+/* ===== STEPS ===== */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:24px}
+.step{text-align:center;position:relative}
+.step::after{content:'';position:absolute;top:28px;left:60%;width:80%;height:2px;background:var(--border)}
+.step:last-child::after{display:none}
+.step .step-num{width:56px;height:56px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;margin:0 auto 16px;position:relative;z-index:1}
+.step h4{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--dark)}
+.step p{font-size:13px;color:var(--text-light)}
+
+/* ===== PHOTO GRID ===== */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.photo-grid .photo{border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:4/3;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);display:flex;align-items:flex-end}
+.photo-grid .photo .photo-label{background:rgba(0,0,0,.6);color:#fff;padding:8px 16px;font-size:13px;width:100%;backdrop-filter:blur(4px)}
+.photo-grid .photo .photo-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;opacity:.3}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:24px}
+.testimonial{border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .2s}
+.testimonial:hover{border-color:var(--green)}
+.testimonial .quote{font-size:14px;color:var(--text);font-style:italic;margin-bottom:16px;line-height:1.6}
+.testimonial .author{display:flex;align-items:center;gap:12px}
+.testimonial .avatar{width:40px;height:40px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--green)}
+.testimonial .author-info h5{font-size:14px;font-weight:700;color:var(--dark)}
+.testimonial .author-info span{font-size:12px;color:var(--text-light)}
+
+/* ===== FAQ ===== */
+.faq-list{margin-top:24px}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:20px 0;cursor:pointer;font-weight:600;font-size:16px;color:var(--dark)}
+.faq-q .icon{width:28px;height:28px;border-radius:50%;background:var(--bg-light);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-light);transition:all .3s;flex-shrink:0}
+.faq-item.open .faq-q .icon{transform:rotate(45deg);background:var(--green-light);color:var(--green)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:14px;color:var(--text-light);line-height:1.7}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:20px}
+
+/* ===== CTA SECTION ===== */
+.cta-section{border:2px solid var(--green);border-radius:var(--radius);padding:48px;text-align:center;margin-top:48px}
+.cta-section h2{font-size:28px;font-weight:800;margin-bottom:8px;color:var(--dark)}
+.cta-section p{color:var(--text-light);margin-bottom:24px}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;padding:14px 32px;border-radius:var(--radius-pill);font-weight:700;font-size:15px;transition:all .2s}
+.btn-primary:hover{background:var(--green-dark);transform:translateY(-2px)}
+
+/* ===== FOOTER ===== */
+.footer{background:var(--dark);color:#fff;padding:48px 0 24px;margin-top:64px}
+.footer-inner{max-width:var(--max-w);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px}
+.footer-brand .footer-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;margin-bottom:12px}
+.footer-brand .footer-logo span{background:var(--green);padding:4px 12px;border-radius:var(--radius-sm);font-size:14px}
+.footer-brand p{color:rgba(255,255,255,.5);font-size:13px;line-height:1.6;max-width:300px}
+.footer h4{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:16px}
+.footer ul li{margin-bottom:10px}
+.footer ul li a{color:rgba(255,255,255,.65);font-size:14px;transition:color .2s}
+.footer ul li a:hover{color:var(--green)}
+.footer-bottom{max-width:var(--max-w);margin:0 auto;padding:24px;display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.1);margin-top:36px;color:rgba(255,255,255,.35);font-size:13px}
+
+/* ===== MOBILE NAV ===== */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:100;padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+.mobile-nav-inner{display:flex;justify-content:space-around}
+.mobile-nav a{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--text-light);gap:4px;padding:4px 8px}
+.mobile-nav a.active{color:var(--green)}
+.mobile-nav a .nav-icon{font-size:20px}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr}
+  .hero-image{display:none}
+  .hero h1{font-size:28px}
+  .categories{grid-template-columns:1fr}
+  .vacancies-grid{grid-template-columns:1fr}
+  .benefits-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .step::after{display:none}
+  .testimonials{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr;gap:32px}
+  .photo-grid{grid-template-columns:1fr}
+  .courier-section{padding:32px 20px}
+  .courier-stats{grid-template-columns:1fr;gap:16px}
+  .mobile-nav{display:block}
+  body{padding-bottom:64px}
+  .header-right,.header-search{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a href="#" class="logo">Сільпо</a>
+    <div class="header-search">
+      <input type="text" placeholder="Посада або адреса">
+    </div>
+    <div class="header-right">
+      <span>📍 Київ, вул. Авіаконструктора...</span>
+      <div class="user">
+        <div class="user-avatar">ОГ</div>
+        <span>Олексій Г.</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#home" class="active">Головна</a>
+    <a href="#vacancies">Вакансії</a>
+    <a href="#courier">Кур'єри</a>
+    <a href="#internship">Програма стажування</a>
+    <a href="#stories">Щоденник надихаючих історій</a>
+    <a href="#about">Про компанію</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div>
+      <h1>Стань частиною команди Сільпо</h1>
+      <p>Понад 400 вакансій по всій Україні — магазини, офіс, склади</p>
+      <a href="#" class="hero-cta">Заповнити анкету →</a>
+      <div class="hero-contacts">
+        <span>📞 0 800 300 730</span>
+        <span>✉ career@silpo.ua</span>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="card-preview">
+        <h4>🏪 Продавець</h4>
+        <p style="font-size:12px;opacity:.7;margin:4px 0">Київ, м. Хрещатик</p>
+        <div class="salary">від 20 000 грн</div>
+      </div>
+      <div class="card-preview" style="margin-top:24px">
+        <h4>🛵 Кур'єр</h4>
+        <p style="font-size:12px;opacity:.7;margin:4px 0">Харків, Салтівка</p>
+        <div class="salary">від 28 000 грн</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-bar">
+    <input type="text" placeholder="🔍 Посада або адреса">
+    <button class="btn-search">Знайти</button>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="section">
+  <div class="categories">
+    <div class="cat-card">
+      <div class="cat-icon">🏪</div>
+      <h3>Магазин та склад</h3>
+      <div class="cat-list">
+        Касир<br>Продавець-консультант<br>Кухар<br>Вантажник<br>Комірник
+      </div>
+      <div class="cat-footer">
+        <span class="cat-count">327 вакансій</span>
+        <span class="cat-arrow">→</span>
+      </div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🛵</div>
+      <h3>Кур'єр</h3>
+      <div class="cat-list" style="line-height:1.6">
+        Важко? Чесно — так.<br>Але платимо гідно<br>і підтримуємо.
+      </div>
+      <div class="cat-footer">
+        <span class="cat-count">89 вакансій</span>
+        <span class="cat-arrow">→</span>
+      </div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🏢</div>
+      <h3>Офіс Сільпо</h3>
+      <div class="cat-list">
+        IT · Розробка<br>Маркетинг<br>Фінанси · HR
+      </div>
+      <div class="cat-footer">
+        <span class="cat-count">64 вакансії</span>
+        <span class="cat-arrow">→</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOT VACANCIES -->
+<section class="section" style="padding-top:0">
+  <div class="section-header">
+    <h2 class="section-title" style="margin-bottom:0">🔥 Гарячі вакансії</h2>
+    <a href="#" class="link-all">Усі вакансії →</a>
+  </div>
+  <div class="pills" style="margin-bottom:16px">
+    <button class="pill active">Всі</button>
+    <button class="pill">Київ</button>
+    <button class="pill">Харків</button>
+    <button class="pill">Одеса</button>
+    <button class="pill">Дніпро</button>
+    <button class="pill">Львів</button>
+  </div>
+  <div class="vacancies-grid">
+    <div class="vacancy-card">
+      <div class="tags">
+        <span class="tag tag-cat">Магазин</span>
+        <span class="tag tag-hot">🔥 Гаряча</span>
+      </div>
+      <h4>Продавець-консультант (м. Хрещатик)</h4>
+      <div class="location">📍 Київ, м. Хрещатик (вул. Хрещатик, 22)</div>
+      <div class="badges">
+        <span class="badge">Повна зайнятість</span>
+        <span class="badge">Без досвіду</span>
+        <span class="badge">Студентам</span>
+        <span class="badge">50+</span>
+      </div>
+      <div class="salary">від 20 000 грн</div>
+    </div>
+    <div class="vacancy-card">
+      <div class="tags">
+        <span class="tag tag-cat">Магазин</span>
+        <span class="tag tag-hot">🔥 Гаряча</span>
+      </div>
+      <h4>Піцайоло (м. Наукова)</h4>
+      <div class="location">📍 Харків, м. Наукова (просп. Науки, 14)</div>
+      <div class="badges">
+        <span class="badge">Повна зайнятість</span>
+        <span class="badge">Досвід від 1 р.</span>
+      </div>
+      <div class="salary">від 22 000 грн</div>
+    </div>
+    <div class="vacancy-card">
+      <div class="tags">
+        <span class="tag tag-warehouse">Склад</span>
+        <span class="tag tag-hot">🔥 Гаряча</span>
+      </div>
+      <h4>Водій-експедитор (склад Васильківська)</h4>
+      <div class="location">📍 Київ, вул. Велика Васильківська, 72</div>
+      <div class="badges">
+        <span class="badge">Повна зайнятість</span>
+        <span class="badge">Кат. B/C</span>
+      </div>
+      <div class="salary">від 28 000 грн</div>
+    </div>
+    <div class="vacancy-card">
+      <div class="tags">
+        <span class="tag tag-cat">Магазин</span>
+      </div>
+      <h4>Молодший кухар (м. Дерибасівська)</h4>
+      <div class="location">📍 Одеса, вул. Дерибасівська, 8</div>
+      <div class="badges">
+        <span class="badge">Часткова зайнятість</span>
+        <span class="badge">Без досвіду</span>
+        <span class="badge">Студентам</span>
+      </div>
+      <div class="salary">від 18 000 грн</div>
+    </div>
+  </div>
+  <button class="btn-more">Показати ще 40 вакансій →</button>
+</section>
+
+<!-- COURIER SECTION -->
+<section class="section" style="padding-top:0">
+  <div class="courier-section">
+    <div class="label">Окрема програма</div>
+    <h2>🛵 Робота кур'єра — чесно про умови</h2>
+    <p>Ми не прикрашаємо: це фізично важка робота. Але ми платимо гідно і постійно покращуємо умови.</p>
+    <ul>
+      <li>Відключення світла і ліфти — ліхтарики, маршрути без проблемних будинків</li>
+      <li>Погода — форма на всі сезони, теплі бокси для скутерів</li>
+      <li>Безпека — відмова від доставки в небезпечних зонах</li>
+      <li>Підтримка 24/7 — диспетчер завжди на зв'язку</li>
+    </ul>
+    <button class="courier-btn">Дивитись вакансії кур'єра →</button>
+    <div class="courier-stats">
+      <div class="courier-stat">
+        <div class="num">32 000</div>
+        <div class="desc">грн середня зп на місяць</div>
+      </div>
+      <div class="courier-stat">
+        <div class="num">2 дні</div>
+        <div class="desc">від відгуку до виходу</div>
+      </div>
+      <div class="courier-stat">
+        <div class="num">Гнучкий</div>
+        <div class="desc">графік — обирай зміни</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="section">
+  <h2 class="section-title">Чому Сільпо / Fozzy Group</h2>
+  <div class="benefits-grid">
+    <div class="benefit-card">
+      <div class="benefit-icon">🚀</div>
+      <h4>Починай кар'єру з нами</h4>
+      <p>Навіть якщо тобі 16 років або ти студент — ми дружні до початківців</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">🤝</div>
+      <h4>Розраховуй на нас</h4>
+      <p>Офіційне оформлення і зарплата вчасно, завжди</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">⚡</div>
+      <h4>Вливайся миттєво</h4>
+      <p>Наставник з першого дня — не кинемо розбиратись самого</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">📅</div>
+      <h4>Плануй впевнено</h4>
+      <p>Гнучкий графік — поєднуй роботу з навчанням і особистим</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">🛡️</div>
+      <h4>Почувайся безпечно</h4>
+      <p>Страхування від нещасних випадків та тяжких захворювань</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">🏆</div>
+      <h4>Пишайся собою</h4>
+      <p>Будуй кар'єру в компанії з відомим брендом в Україні</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">📚</div>
+      <h4>Всебічно розвивайся</h4>
+      <p>Сучасні програми навчання — до керівника можна дійти зсередини</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">🎁</div>
+      <h4>Почувайся особливо</h4>
+      <p>Знижки у SilpoVoyage, «Білій ромашці», MAUDAU та інших партнерах групи</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">🍕</div>
+      <h4>Їж смачно</h4>
+      <p>Знижки на кулінарію, рибу, піцу та кондитерські вироби власного виробництва</p>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="section" style="background:var(--bg-light);max-width:100%;padding:48px 0">
+  <div style="max-width:var(--max-w);margin:0 auto;padding:0 24px">
+    <h2 class="section-title">Етапи відбору</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Анкета</h4>
+        <p>Заповни форму — розкажи про себе та що тебе цікавить</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Співбесіда</h4>
+        <p>Дізнайся більше про нас та познайомся з командою</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Перевірка</h4>
+        <p>Коротке тестування або пробна зміна залежно від посади</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>Офер</h4>
+        <p>Отримуєш пропозицію і виходиш на роботу</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPANY LIFE -->
+<section class="section">
+  <h2 class="section-title">Життя компанії</h2>
+  <div class="photo-grid">
+    <div class="photo">
+      <div class="photo-placeholder">🏪</div>
+      <div class="photo-label">Ранкова зміна, Сільпо Оболонь</div>
+    </div>
+    <div class="photo">
+      <div class="photo-placeholder">👩‍💼</div>
+      <div class="photo-label">Навчання нових касирів</div>
+    </div>
+    <div class="photo">
+      <div class="photo-placeholder">👨‍🍳</div>
+      <div class="photo-label">Команда відділу кулінарії</div>
+    </div>
+    <div class="photo" style="background:linear-gradient(135deg,#e8eaf6,#c5cae9)">
+      <div class="photo-placeholder">🏢</div>
+      <div class="photo-label">Офіс, HR-команда</div>
+    </div>
+    <div class="photo" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2)">
+      <div class="photo-placeholder">🎉</div>
+      <div class="photo-label">Корпоратив, Київ 2024</div>
+    </div>
+    <div class="photo" style="background:linear-gradient(135deg,#fce4ec,#f8bbd0)">
+      <div class="photo-placeholder">💐</div>
+      <div class="photo-label">Ранкова зміна, Сільпо Оболонь</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" style="padding-top:0">
+  <h2 class="section-title">Наші про нас</h2>
+  <p style="color:var(--text-light);margin-bottom:24px">Без сценарію — просто розповідають</p>
+  <div class="testimonials">
+    <div class="testimonial">
+      <div class="quote">«Прийшла на касу студенткою, зараз керую відділом. За 4 роки пройшла 3 підвищення — і все всередині однієї компанії.»</div>
+      <div class="author">
+        <div class="avatar">О</div>
+        <div class="author-info">
+          <h5>Оксана, 26</h5>
+          <span>Старший продавець · Київ · 4 роки</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="quote">«Графік 2/2 — можу нормально жити. Колеги допомагають з першого дня, не кинули самого розбиратись.»</div>
+      <div class="author">
+        <div class="avatar">М</div>
+        <div class="author-info">
+          <h5>Михайло, 34</h5>
+          <span>Вантажник складу · Дніпро · 1,5 роки</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="quote">«Я 52 роки — взяли без питань. Молоді колеги спочатку дивувались, а зараз я сам їх навчаю.»</div>
+      <div class="author">
+        <div class="avatar">В</div>
+        <div class="author-info">
+          <h5>Василь, 52</h5>
+          <span>Охоронець · Харків · 2 роки</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="quote">«Переїхала з Маріуполя. Компанія допомогла з тимчасовим житлом і влаштуванням. Для мене це була не просто робота.»</div>
+      <div class="author">
+        <div class="avatar">Н</div>
+        <div class="author-info">
+          <h5>Наталія, 41</h5>
+          <span>Флорист · Львів · 2,5 роки</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" style="padding-top:0">
+  <h2 class="section-title">Питання та відповіді</h2>
+  <div class="faq-list">
+    <div class="faq-item open">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Чи потрібен досвід роботи?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">Для більшості позицій у магазині — ні. Ми навчаємо з нуля: є наставник, внутрішні тренінги та пробний період. Досвід потрібен лише для окремих спеціалізованих ролей.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Як швидко розглядають заявку?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">HR телефонує протягом 1 робочого дня після отримання анкети. Якщо не вийшло зв'язатись — передзвонюємо самі.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Чи можна працювати студентом або неповнолітнім?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">Так. З 16 років — з певними обмеженнями за трудовим кодексом. Студентам пропонуємо часткову зайнятість і гнучкий графік.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Яке оформлення — офіційне чи ні?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">Тільки офіційне. Трудовий договір, запис у трудовій, соціальне страхування та лікарняні — все за законом.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Що якщо я хочу змінити місто або магазин?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">Маємо понад 300 магазинів по всій Україні. Переведення між філіями можливе — треба поговорити з HR-менеджером.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Чи є кар'єрний ріст?
+        <span class="icon">+</span>
+      </div>
+      <div class="faq-a">Більшість керівників магазинів виросли зсередини. Компанія заохочує внутрішні переміщення і підвищення.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section" style="padding-top:0">
+  <div class="cta-section">
+    <h2>Не знайшов підходящої вакансії?</h2>
+    <p>Залиш анкету — ми повідомимо, коли з'явиться щось для тебе</p>
+    <button class="btn-primary">Залишити анкету</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <span>С</span> Сільпо Роботи
+      </div>
+      <p>Знайди роботу у одній з найбільших роздрібних мереж України. Понад 500 вакансій по всій країні.</p>
+    </div>
+    <div>
+      <h4>Вакансії</h4>
+      <ul>
+        <li><a href="#">Магазин та склад</a></li>
+        <li><a href="#">Кур'єри</a></li>
+        <li><a href="#">Офіс Сільпо</a></li>
+        <li><a href="#">Стажери</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Компанія</h4>
+      <ul>
+        <li><a href="#">Про Fozzy Group</a></li>
+        <li><a href="#">Цінності</a></li>
+        <li><a href="#">Контакти HR</a></li>
+        <li><a href="#">Конфіденційність</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Fozzy Group</span>
+    <span>Політика конфіденційності</span>
+  </div>
+</footer>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <a href="#home" class="active"><span class="nav-icon">🏠</span>Головна</a>
+    <a href="#vacancies"><span class="nav-icon">📋</span>Вакансії</a>
+    <a href="#courier"><span class="nav-icon">🛵</span>Кур'єр</a>
+    <a href="#"><span class="nav-icon">📝</span>Анкета</a>
+  </div>
+</nav>
+
+<script>
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.nav a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    document.querySelectorAll('.nav a').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
