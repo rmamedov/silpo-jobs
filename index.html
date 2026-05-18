@@ -43,6 +43,10 @@ input,select,textarea{font:inherit}
 .autosuggest-item .as-meta{font-size:12px;color:var(--text-light);display:flex;gap:8px;margin-top:2px}
 .autosuggest-item .as-salary{font-size:13px;font-weight:700;color:var(--green);white-space:nowrap;flex-shrink:0}
 .autosuggest-hint{padding:10px 16px;font-size:12px;color:var(--text-light);text-align:center}
+.autosuggest-item .as-count{font-size:12px;color:var(--text-light);white-space:nowrap;flex-shrink:0}
+.autosuggest-city .autosuggest-item .as-icon{font-size:14px;width:32px;height:32px;border-radius:50%}
+.autosuggest-city{min-width:260px;right:0}
+.autosuggest-city .as-title{overflow:visible;white-space:nowrap}
 .search-wrap{position:relative}
 .header-right{display:flex;align-items:center;gap:16px;margin-left:auto;font-size:14px;color:var(--text-light)}
 .header-right .user{display:flex;align-items:center;gap:8px}
@@ -413,6 +417,7 @@ const VACANCIES = [
 ];
 
 const CITIES = ["Київ","Харків","Одеса","Дніпро","Львів"];
+const ALL_CITIES = ["Київ","Харків","Одеса","Дніпро","Львів","Запоріжжя","Вінниця","Полтава","Чернігів","Черкаси","Суми","Хмельницький","Житомир","Рівне","Тернопіль","Івано-Франківськ","Ужгород","Луцьк","Кропивницький","Миколаїв","Херсон","Чернівці","Біла Церква","Кременчук","Маріуполь","Краматорськ","Бровари","Ірпінь","Буча"];
 const CATEGORIES_MAP = {"Магазин":"Магазин","Склад":"Склад","Офіс":"Офіс","Кур'єр":"Кур'єр"};
 
 // ============ APP ============
@@ -662,6 +667,104 @@ const App = {
     this.navigate('vacancies');
   },
 
+  // ============ CITY AUTOSUGGEST ============
+  _cityIdx: -1,
+  _cityResults: [],
+
+  buildCityResults(query) {
+    const q = query.toLowerCase().trim();
+    if (!q) return ALL_CITIES.slice(); // show all on focus
+    return ALL_CITIES.filter(c => c.toLowerCase().includes(q))
+      .sort((a, b) => {
+        const aStarts = a.toLowerCase().startsWith(q) ? 0 : 1;
+        const bStarts = b.toLowerCase().startsWith(q) ? 0 : 1;
+        return aStarts - bStarts || a.localeCompare(b, 'uk');
+      });
+  },
+
+  getCityVacCount(city) {
+    return VACANCIES.filter(v => v.city === city).length;
+  },
+
+  renderCitySuggest(results, query, suggestId) {
+    if (!results.length) return '<div class="autosuggest-hint">Місто не знайдено</div>';
+    return results.map((city, i) => {
+      const highlighted = query ? this.highlightMatch(city, query) : city;
+      const cnt = this.getCityVacCount(city);
+      return `<div class="autosuggest-item${i === this._cityIdx ? ' selected' : ''}"
+        onmousedown="App.selectCity('${city}','${suggestId}')"
+        onmouseenter="App._cityIdx=${i};App.updateCityHighlight('${suggestId}')">
+        <div class="as-icon">📍</div>
+        <div class="as-info"><div class="as-title">${highlighted}</div></div>
+        ${cnt ? `<div class="as-count">${cnt} вакансій</div>` : '<div class="as-count" style="color:#ccc">—</div>'}
+      </div>`;
+    }).join('');
+  },
+
+  onCityInput(input, suggestId) {
+    const q = input.value.trim();
+    this._cityIdx = -1;
+    const results = this.buildCityResults(q);
+    this._cityResults = results;
+    const el = document.getElementById(suggestId);
+    if (!el) return;
+    el.innerHTML = this.renderCitySuggest(results, q, suggestId);
+    el.classList.add('open');
+  },
+
+  onCityFocus(input, suggestId) {
+    this.onCityInput(input, suggestId);
+  },
+
+  onCityKeydown(e, input, suggestId) {
+    const el = document.getElementById(suggestId);
+    if (!el || !el.classList.contains('open')) return;
+    const results = this._cityResults;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this._cityIdx = Math.min(this._cityIdx + 1, results.length - 1);
+      this.updateCityHighlight(suggestId);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this._cityIdx = Math.max(this._cityIdx - 1, -1);
+      this.updateCityHighlight(suggestId);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (this._cityIdx >= 0 && results[this._cityIdx]) {
+        this.selectCity(results[this._cityIdx], suggestId);
+      } else if (results.length === 1) {
+        this.selectCity(results[0], suggestId);
+      } else {
+        el.classList.remove('open');
+      }
+    } else if (e.key === 'Escape') {
+      el.classList.remove('open');
+    }
+  },
+
+  updateCityHighlight(suggestId) {
+    const el = document.getElementById(suggestId);
+    if (!el) return;
+    el.querySelectorAll('.autosuggest-item').forEach((item, i) => {
+      item.classList.toggle('selected', i === this._cityIdx);
+    });
+    const sel = el.querySelector('.autosuggest-item.selected');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+  },
+
+  selectCity(city, suggestId) {
+    // Find the input that triggered this suggest
+    const el = document.getElementById(suggestId);
+    if (el) {
+      const wrap = el.closest('.search-wrap');
+      const input = wrap?.querySelector('input');
+      if (input) input.value = city;
+      el.classList.remove('open');
+    }
+    this._cityIdx = -1;
+    this._cityResults = [];
+  },
+
   // ============ RENDER HELPERS ============
   renderVacancyCard(v, cls='') {
     const catClass = v.category==='Склад'?'tag-warehouse':v.category==='Офіс'?'tag-office':v.category==='Кур\'єр'?'tag-hot':'tag-cat';
@@ -704,7 +807,14 @@ const App = {
           >
           <div class="autosuggest" id="homeSuggest"></div>
         </div>
-        <select id="homeCity"><option value="">Всі міста</option>${CITIES.map(c=>`<option>${c}</option>`).join('')}</select>
+        <div class="search-wrap" style="min-width:180px">
+          <input type="text" placeholder="Всі міста" id="homeCity" autocomplete="off" style="padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:15px;outline:none;width:100%"
+            oninput="App.onCityInput(this,'homeCitySuggest')"
+            onkeydown="App.onCityKeydown(event,this,'homeCitySuggest')"
+            onfocus="App.onCityFocus(this,'homeCitySuggest')"
+          >
+          <div class="autosuggest autosuggest-city" id="homeCitySuggest"></div>
+        </div>
         <button class="btn-search" onclick="App.homeSearch()">Знайти</button>
       </div></div>
       <section class="section"><div class="categories">
