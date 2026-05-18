@@ -915,7 +915,7 @@ const App = {
         <div class="vac-page-header"><h1>Вакансії</h1><div class="vac-count">Знайдено: <strong>${total}</strong></div></div>
         <div class="quick-filters">
           ${[{key:'',label:'Всі напрями',icon:''},{key:'Магазин',label:'Магазин та склад',icon:'🏪'},{key:'Офіс',label:'Офіс Сільпо',icon:'🏢'},{key:"Кур'єр",label:"Кур'єри",icon:'🛵'},{key:'Склад',label:'Склад',icon:'📦'}].map(q=>
-            `<button class="quick-filter${f.category===q.key?' active':''}" onclick="App.setQuickFilter('${q.key}')">${q.icon?`<span class="qf-icon">${q.icon}</span>`:''}${q.label}</button>`
+            `<button class="quick-filter${f.category===q.key?' active':''}" onclick="App.setQuickFilter(&quot;${q.key}&quot;)">${q.icon?`<span class="qf-icon">${q.icon}</span>`:''}${q.label}</button>`
           ).join('')}
         </div>
         ${activeFilters.length?`<div class="active-filters">${activeFilters.map(af=>`<span class="active-filter">${af.label}<span class="remove" onclick="App.removeFilter('${af.key}','${af.val||''}')">&times;</span></span>`).join('')}<button class="btn-reset" onclick="App.resetFilters()">Скинути всі</button></div>`:''}
