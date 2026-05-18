@@ -1,0 +1,490 @@
+/* =========================================================================
+   SILPO JOBS — patterns built on top of the Сільпо Design System tokens
+   Imports silpo-tokens.css (colours, type, radii, shadows, spacing, fonts).
+   ========================================================================= */
+
+@import "silpo-tokens.css";
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--surface);
+  color: var(--fg-1);
+  font-family: var(--font-text);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font: inherit; border: 0; background: none; color: inherit; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+input, select, textarea { font: inherit; }
+
+:root { --max-w: 1200px; }
+
+/* =========================================================================
+   HEADER + NAV
+   ========================================================================= */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-1);
+}
+.header-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--s-6);
+  display: flex; align-items: center; gap: var(--s-4);
+  height: 64px;
+}
+
+/* Brand mark — orange tile + heart */
+.logo {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  font-family: var(--font-display);
+  font-weight: 800; font-size: var(--t-18);
+  color: var(--fg-1);
+  white-space: nowrap; cursor: pointer;
+}
+.logo .logo-tile {
+  width: 36px; height: 36px;
+  border-radius: var(--r-12);
+  background: var(--orange-500);
+  display: grid; place-items: center;
+  color: #fff;
+}
+.logo .logo-tile svg { width: 22px; height: 22px; }
+.logo .logo-suffix {
+  font-family: var(--font-text);
+  font-size: var(--t-13);
+  color: var(--fg-3);
+  font-weight: 500;
+  margin-left: 2px;
+}
+
+.header-search { flex: 1; max-width: 420px; }
+.header-search .silpo-input { padding: 10px var(--s-4); font-size: var(--t-14); }
+
+.header-right {
+  display: flex; align-items: center; gap: var(--s-4);
+  margin-left: auto;
+  font-size: var(--t-14); color: var(--fg-2);
+}
+.header-right .user {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: 6px 10px 6px 6px;
+  border-radius: var(--r-pill);
+  transition: background var(--dur) var(--easing);
+}
+.header-right .user:hover { background: var(--black-4); }
+.header-right .user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--orange-500); color: #fff;
+  display: grid; place-items: center;
+  font-weight: 700; font-size: var(--t-13);
+}
+
+/* Sub-nav */
+.nav { background: var(--surface); border-bottom: 1px solid var(--border-1); }
+.nav-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--s-6);
+  display: flex; gap: var(--s-1);
+  overflow-x: auto;
+}
+.nav a {
+  display: block;
+  padding: var(--s-4) var(--s-4);
+  font-size: var(--t-14); font-weight: 600;
+  color: var(--fg-2);
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color var(--dur) var(--easing);
+}
+.nav a:hover { color: var(--fg-1); }
+.nav a.active { color: var(--fg-1); border-bottom-color: var(--orange-500); }
+
+/* =========================================================================
+   BUTTONS — pill (radius 24/999), Сільпо style
+   Primary = Blue Controls. Brand = Orange (only on brand surfaces).
+   ========================================================================= */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  font-family: var(--font-text);
+  font-weight: 700;
+  font-size: var(--t-14);
+  line-height: 1;
+  padding: 13px 22px;
+  border-radius: var(--r-pill);
+  border: 0;
+  cursor: pointer;
+  transition: background var(--dur) var(--easing), color var(--dur) var(--easing);
+}
+.btn-lg { padding: 16px 28px; font-size: var(--t-16); }
+.btn-sm { padding: 9px 16px; font-size: var(--t-13); }
+.btn-xs { padding: 6px 12px; font-size: var(--t-12); }
+
+.btn-primary { background: var(--blue-500); color: #fff; }
+.btn-primary:hover { background: var(--blue-600); }
+.btn-primary:active { background: var(--blue-700); }
+.btn-primary:focus-visible { box-shadow: var(--shadow-focus); outline: none; }
+
+.btn-brand { background: var(--orange-500); color: #fff; }
+.btn-brand:hover { background: var(--orange-600); }
+.btn-brand:active { background: var(--orange-700); }
+
+.btn-tert { background: var(--blue-100); color: var(--blue-700); }
+.btn-tert:hover { background: var(--blue-200); }
+
+.btn-stroked { background: transparent; color: var(--blue-500); box-shadow: inset 0 0 0 1px var(--blue-500); }
+.btn-stroked:hover { background: var(--blue-100); }
+
+.btn-ghost { background: transparent; color: var(--fg-1); }
+.btn-ghost:hover { background: var(--black-6); }
+
+.btn-dark { background: var(--fg-1); color: #fff; }
+.btn-dark:hover { background: #000; }
+
+.btn-light { background: #fff; color: var(--fg-1); box-shadow: inset 0 0 0 1px var(--border-2); }
+.btn-light:hover { background: var(--black-4); }
+
+.btn-disabled, .btn:disabled { background: var(--black-12); color: var(--white-87); cursor: not-allowed; }
+
+/* Round icon button — Сільпо canonical */
+.btn-round {
+  width: 44px; height: 44px; border-radius: var(--r-pill);
+  background: #fff;
+  display: grid; place-items: center;
+  color: var(--black-72);
+  box-shadow: var(--shadow-volume), 0 0 0 1px var(--black-8);
+  transition: box-shadow var(--dur) var(--easing);
+}
+.btn-round:hover { background: var(--black-4); }
+.btn-round:focus-visible { box-shadow: var(--shadow-focus), 0 0 0 1px var(--black-8); outline: none; }
+.btn-round.brand { background: var(--blue-500); color: #fff; box-shadow: none; }
+
+/* =========================================================================
+   INPUTS — filled style, cool-blue well → white + 2px blue ring on focus
+   ========================================================================= */
+.silpo-input {
+  background: var(--surface-2);
+  border-radius: var(--r-16);
+  padding: 12px var(--s-4);
+  display: flex; align-items: center; gap: 10px;
+  color: var(--fg-1);
+  font-size: var(--t-16);
+  width: 100%;
+  border: 0;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur) var(--easing), background var(--dur) var(--easing);
+}
+.silpo-input input,
+.silpo-input select,
+input.silpo-input,
+select.silpo-input,
+textarea.silpo-input {
+  flex: 1; min-width: 0;
+  background: transparent;
+  border: 0; outline: none;
+  font-size: inherit; color: inherit;
+  font-family: inherit;
+}
+.silpo-input::placeholder, .silpo-input input::placeholder { color: var(--black-60); }
+.silpo-input:focus-within,
+input.silpo-input:focus,
+select.silpo-input:focus,
+textarea.silpo-input:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 2px var(--blue-500);
+  outline: none;
+}
+.silpo-input.error { background: #fff; box-shadow: inset 0 0 0 2px var(--red-500); }
+.silpo-input svg { width: 20px; height: 20px; color: var(--black-60); flex-shrink: 0; }
+
+textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
+
+.form-group { display: flex; flex-direction: column; gap: var(--s-1); margin-bottom: var(--s-4); }
+.form-group .floating-label { font-size: var(--t-12); font-weight: 600; color: var(--fg-2); padding: 0 2px; }
+.form-group .hint { font-size: var(--t-12); color: var(--fg-2); padding: 0 2px; }
+.form-group .hint.err { color: var(--red-600); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+
+.form-check { display: flex; align-items: center; gap: var(--s-2); font-size: var(--t-13); margin-bottom: var(--s-4); }
+.form-check input[type=checkbox] { accent-color: var(--blue-500); width: 18px; height: 18px; }
+.form-check a { color: var(--blue-500); text-decoration: underline; }
+
+/* =========================================================================
+   CHIPS / PILLS — filter chips
+   ========================================================================= */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-13); font-weight: 600;
+  background: var(--surface-3);
+  color: var(--fg-1);
+  cursor: pointer;
+  transition: background var(--dur) var(--easing), color var(--dur) var(--easing);
+  border: 0;
+}
+.chip:hover { background: var(--neutral-200); }
+.chip.on { background: var(--blue-500); color: #fff; }
+.chip.outline { background: transparent; box-shadow: inset 0 0 0 1px var(--border-2); }
+
+/* =========================================================================
+   TAGS / STICKERS / BADGES
+   ========================================================================= */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-8);
+  font-size: var(--t-12);
+  font-weight: 700;
+}
+.tag-shop      { background: var(--orange-100); color: var(--orange-900); }
+.tag-warehouse { background: var(--blue-100);   color: var(--blue-700); }
+.tag-office    { background: var(--violet-100); color: var(--violet-700); }
+.tag-courier   { background: var(--pink-100);   color: var(--pink-700); }
+
+/* Hot/Discount sticker with perforation cut — Сільпо signature */
+.sticker {
+  position: relative;
+  display: inline-flex; align-items: center;
+  background: var(--pink-500); color: #fff;
+  font-weight: 800; font-size: var(--t-12);
+  padding: 5px 10px 5px 16px;
+  border-radius: 0 6px 6px 0;
+}
+.sticker::before {
+  content: ''; position: absolute;
+  left: -1px; top: 50%; transform: translateY(-50%);
+  width: 10px; height: 10px;
+  background: #fff;
+  border-radius: 50%;
+}
+.sticker.orange { background: var(--orange-500); }
+.sticker.green  { background: var(--green-500); }
+.sticker.violet { background: var(--violet-500); }
+.sticker.on-tinted::before { background: var(--surface-2); }
+
+/* Inline meta badge — neutral pill */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-8);
+  font-size: var(--t-12); font-weight: 600;
+  background: var(--surface-3);
+  color: var(--fg-2);
+}
+.badge.brand { background: var(--orange-100); color: var(--orange-900); }
+.badge.blue  { background: var(--blue-100); color: var(--blue-700); }
+.badge.success { background: var(--green-100); color: var(--green-700); }
+
+/* Status dot */
+.dot-status { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-12); color: var(--fg-2); }
+.dot-status .d { width: 8px; height: 8px; border-radius: 50%; }
+
+/* =========================================================================
+   CARDS / SECTIONS
+   ========================================================================= */
+.section {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: var(--s-12) var(--s-6);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-32);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: var(--fg-1);
+  margin-bottom: var(--s-5);
+}
+.section-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: var(--s-5); gap: var(--s-3); flex-wrap: wrap;
+}
+.section-header .link-all {
+  color: var(--blue-500);
+  font-weight: 600;
+  font-size: var(--t-14);
+  display: inline-flex; align-items: center; gap: 4px;
+  cursor: pointer;
+}
+.section-header .link-all:hover { color: var(--blue-700); }
+
+/* Standard "tile" card (white, 16px round, hairline outline + volume shadow) */
+.tile {
+  background: #fff;
+  border-radius: var(--r-16);
+  box-shadow: var(--shadow-volume), 0 0 0 1px var(--black-6);
+  transition: box-shadow var(--dur) var(--easing);
+}
+.tile-pad { padding: var(--s-5); }
+.tile-link:hover { box-shadow: var(--shadow-volume), 0 0 0 1px var(--black-24); }
+
+/* =========================================================================
+   VACANCY CARD
+   ========================================================================= */
+.vacancy-card {
+  background: #fff;
+  border-radius: var(--r-16);
+  box-shadow: var(--shadow-volume), 0 0 0 1px var(--black-6);
+  padding: var(--s-5);
+  transition: box-shadow var(--dur) var(--easing);
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: var(--s-2);
+}
+.vacancy-card:hover { box-shadow: var(--shadow-volume), 0 0 0 1px var(--black-24); }
+.vacancy-card .vc-head { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.vacancy-card .vc-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-18);
+  color: var(--fg-1);
+  line-height: 1.3;
+}
+.vacancy-card .vc-location {
+  font-size: var(--t-13);
+  color: var(--fg-2);
+  display: flex; align-items: center; gap: 4px;
+}
+.vacancy-card .vc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.vacancy-card .vc-salary {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-20);
+  color: var(--fg-1);
+}
+.vacancy-card .vc-salary .currency { font-size: var(--t-14); color: var(--fg-3); margin-left: 2px; }
+.vacancy-card .vc-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+.vacancy-card .vc-date { font-size: var(--t-12); color: var(--fg-3); }
+
+/* =========================================================================
+   CATEGORY TILE — emoji on tinted background (Сільпо canonical)
+   ========================================================================= */
+.cat-tile {
+  background: #fff;
+  border-radius: var(--r-16);
+  box-shadow: var(--shadow-volume), 0 0 0 1px var(--black-6);
+  padding: var(--s-5);
+  display: flex; align-items: center; gap: var(--s-4);
+  cursor: pointer;
+  transition: box-shadow var(--dur) var(--easing);
+}
+.cat-tile:hover { box-shadow: var(--shadow-volume), 0 0 0 1px var(--black-24); }
+.cat-tile .cat-emoji-tile {
+  width: 64px; height: 64px;
+  border-radius: var(--r-16);
+  display: grid; place-items: center;
+  font-size: 32px;
+  flex-shrink: 0;
+}
+.cat-tile .cat-meta { flex: 1; }
+.cat-tile .cat-meta h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-20);
+  color: var(--fg-1);
+  margin-bottom: 4px;
+}
+.cat-tile .cat-meta .cat-count { font-size: var(--t-13); color: var(--fg-2); }
+.cat-tile .cat-arrow {
+  width: 36px; height: 36px;
+  border-radius: var(--r-pill);
+  background: var(--blue-500); color: #fff;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+
+.tint-orange  { background: var(--orange-100); }
+.tint-blue    { background: var(--blue-100); }
+.tint-green   { background: var(--green-100); }
+.tint-violet  { background: var(--violet-100); }
+.tint-pink    { background: var(--pink-100); }
+.tint-yellow  { background: var(--yellow-100); }
+.tint-lblue   { background: var(--lblue-100); }
+.tint-neutral { background: var(--neutral-100); }
+
+/* =========================================================================
+   FOOTER
+   ========================================================================= */
+.footer {
+  background: var(--fg-1); color: #fff;
+  padding: var(--s-12) 0 var(--s-6);
+  margin-top: var(--s-16);
+}
+.footer-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--s-6);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--s-10);
+}
+.footer-brand .logo { color: #fff; }
+.footer-brand .logo .logo-suffix { color: var(--white-60); }
+.footer-brand p {
+  color: var(--white-60);
+  font-size: var(--t-13);
+  line-height: 1.5;
+  margin-top: var(--s-3);
+  max-width: 320px;
+}
+.footer h4 {
+  font-family: var(--font-text);
+  font-size: var(--t-12);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--white-54);
+  margin-bottom: var(--s-4);
+  font-weight: 700;
+}
+.footer ul li { margin-bottom: var(--s-2); }
+.footer ul li a {
+  color: var(--white-72);
+  font-size: var(--t-14);
+}
+.footer ul li a:hover { color: #fff; }
+.footer-bottom {
+  max-width: var(--max-w);
+  margin: var(--s-8) auto 0;
+  padding: var(--s-6);
+  display: flex; justify-content: space-between;
+  border-top: 1px solid var(--white-12);
+  color: var(--white-38);
+  font-size: var(--t-13);
+}
+
+/* =========================================================================
+   UTILITY
+   ========================================================================= */
+.fade-in { animation: fadeIn var(--dur-slow) var(--easing); }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Type helpers (in addition to .silpo-* in tokens) */
+.text-fg-2 { color: var(--fg-2); }
+.text-fg-3 { color: var(--fg-3); }
+.text-brand { color: var(--orange-500); }
+.text-action { color: var(--blue-500); }
+
+/* Section divider */
+.well { background: var(--surface-2); }
+
+/* Mobile */
+@media (max-width: 900px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: var(--s-6); }
+  .form-row { grid-template-columns: 1fr; }
+  .header-right .user span { display: none; }
+}
+@media (max-width: 600px) {
+  .footer-inner { grid-template-columns: 1fr; }
+  .section { padding: var(--s-8) var(--s-4); }
+}

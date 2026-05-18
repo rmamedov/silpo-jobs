@@ -1,0 +1,284 @@
+/* =========================================================================
+   Сільпо Design System — colors, type & foundational tokens
+   Reconstructed from the official Сільпо Figma library.
+   Brand typefaces (loaded from fonts/):
+     • Silpo Text     — primary UI / body
+     • Silpo Rounded  — playful display variant (used on marketing surfaces)
+   ========================================================================= */
+
+/* ─── Silpo Text ─── */
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 100; src: url("fonts/SilpoText-Thin.ttf")        format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 200; src: url("fonts/SilpoText-ExtraLight.ttf")  format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 300; src: url("fonts/SilpoText-Light.ttf")       format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 400; src: url("fonts/SilpoText-Regular.ttf")     format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 500; src: url("fonts/SilpoText-Medium.ttf")      format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 600; src: url("fonts/SilpoText-SemiBold.ttf")    format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 700; src: url("fonts/SilpoText-Bold.ttf")        format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 800; src: url("fonts/SilpoText-ExtraBold.ttf")   format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text"; font-style: normal; font-weight: 900; src: url("fonts/SilpoText-Black.ttf")       format("truetype"); font-display: swap; }
+
+/* ─── Silpo Text Caption (optical size — used at very small sizes) ─── */
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 100; src: url("fonts/SilpoText-CaptionThin.ttf")       format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 200; src: url("fonts/SilpoText-CaptionExtraLight.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 300; src: url("fonts/SilpoText-CaptionLight.ttf")      format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 400; src: url("fonts/SilpoText-CaptionRegular.ttf")    format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 500; src: url("fonts/SilpoText-CaptionMedium.ttf")     format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 600; src: url("fonts/SilpoText-CaptionSemiBold.ttf")   format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 700; src: url("fonts/SilpoText-CaptionBold.ttf")       format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 800; src: url("fonts/SilpoText-CaptionExtraBold.ttf")  format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Text Caption"; font-style: normal; font-weight: 900; src: url("fonts/SilpoText-CaptionBlack.ttf")      format("truetype"); font-display: swap; }
+
+/* ─── Silpo Rounded — playful display variant ─── */
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 100; src: url("fonts/SilpoRounded-Thin.ttf")       format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 200; src: url("fonts/SilpoRounded-ExtraLight.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 300; src: url("fonts/SilpoRounded-Light.ttf")      format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 400; src: url("fonts/SilpoRounded-Regular.ttf")    format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 500; src: url("fonts/SilpoRounded-Medium.ttf")     format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 600; src: url("fonts/SilpoRounded-SemiBold.ttf")   format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 700; src: url("fonts/SilpoRounded-Bold.ttf")       format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 800; src: url("fonts/SilpoRounded-ExtraBold.ttf")  format("truetype"); font-display: swap; }
+@font-face { font-family: "Silpo Rounded"; font-style: normal; font-weight: 900; src: url("fonts/SilpoRounded-Black.ttf")      format("truetype"); font-display: swap; }
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---------- BRAND ---------- */
+  /* Orange — the unmistakable Сільпо brand colour */
+  --orange-100: #FFF0E0;
+  --orange-200: #FFE1C1;
+  --orange-300: #FFC384;
+  --orange-400: #FF9B32;
+  --orange-500: #FF8200; /* Brand primary */
+  --orange-550: #F07A00;
+  --orange-600: #FF6F00;
+  --orange-700: #FF5C00;
+  --orange-900: #D76609;
+
+  --brand: var(--orange-500);
+  --brand-press: var(--orange-700);
+  --brand-tint: var(--orange-100);
+
+  /* ---------- BLUE (Controls / accent) ---------- */
+  --blue-50:  #F6F8FD;
+  --blue-100: #EEF2FC;
+  --blue-200: #D3DEF5;
+  --blue-300: #ACBFEE;
+  --blue-400: #5881DB;
+  --blue-500: #2358D1; /* Primary control */
+  --blue-600: #1A47C6;
+  --blue-700: #1135BA;
+  --blue-800: #0B2AA0;
+
+  /* ---------- ADDITIONAL (Neutral cool) ---------- */
+  --neutral-100: #F1F2F8;
+  --neutral-200: #E4E5ED;
+  --neutral-300: #CECFD9;
+  --neutral-400: #B6B8C6;
+  --neutral-500: #A6A8B9;
+  --neutral-600: #86889D;
+  --neutral-700: #6C6E86;
+
+  /* ---------- SEMANTIC: SUCCESS / Green ---------- */
+  --green-100: #EBF9ED;
+  --green-200: #CDF0D3;
+  --green-300: #91DE9E;
+  --green-400: #42C658;
+  --green-500: #07B324; /* Success primary */
+  --green-600: #049B16;
+  --green-700: #018308;
+  --green-900: #005204;
+  --success: var(--green-500);
+
+  /* ---------- SEMANTIC: WARNING / Yellow ---------- */
+  --yellow-100: #FFF6E0;
+  --yellow-200: #FFEDC1;
+  --yellow-300: #FFDB84;
+  --yellow-400: #FFC232;
+  --yellow-500: #FFB200; /* Warning primary */
+  --yellow-600: #FF9D00;
+  --yellow-700: #FF8C00;
+  --yellow-900: #552F00;
+  --warning: var(--yellow-500);
+
+  /* ---------- SEMANTIC: ERROR / Red ---------- */
+  --red-100: #FFEBEF;
+  --red-200: #FFCED7;
+  --red-300: #FF93A8;
+  --red-400: #FF4569;
+  --red-500: #FF0A3B; /* Error primary */
+  --red-600: #E20934;
+  --red-700: #C5082E;
+  --red-900: #98001F;
+  --error: var(--red-500);
+
+  /* ---------- ACCENT: PINK ---------- */
+  --pink-100: #FAE6F0;
+  --pink-200: #F7D4E5;
+  --pink-300: #F1B1D1;
+  --pink-400: #EC89BA;
+  --pink-500: #FF3399;
+  --pink-600: #E9167F;
+  --pink-700: #C20A66;
+
+  /* ---------- ACCENT: LIGHT BLUE ---------- */
+  --lblue-100: #E7F3F8;
+  --lblue-200: #C9E1ED;
+  --lblue-300: #9ED1EA;
+  --lblue-400: #76C3EA;
+  --lblue-500: #00AAFF;
+  --lblue-600: #0087CB;
+  --lblue-700: #006DA3;
+
+  /* ---------- ACCENT: VIOLET ---------- */
+  --violet-100: #EEE7FF;
+  --violet-200: #DDD2FF;
+  --violet-300: #C6AEFF;
+  --violet-400: #AA80FF;
+  --violet-500: #801BFF;
+  --violet-600: #7916EB;
+  --violet-700: #6512C5;
+
+  /* ---------- DARK BLUE / Text base on light ---------- */
+  --dark-blue: #172650; /* used at 87% for the deepest text on light bg */
+
+  /* ---------- BLACK SCALE (opacity tokens) ---------- */
+  --black-base: 32,33,36; /* rgb tuple of #202124 */
+  --black-87: rgba(32,33,36,0.87);
+  --black-72: rgba(32,33,36,0.72);
+  --black-60: rgba(32,33,36,0.60);
+  --black-54: rgba(32,33,36,0.54);
+  --black-38: rgba(32,33,36,0.38);
+  --black-24: rgba(32,33,36,0.24);
+  --black-12: rgba(32,33,36,0.12);
+  --black-8:  rgba(32,33,36,0.08);
+  --black-6:  rgba(32,33,36,0.06);
+  --black-4:  rgba(32,33,36,0.04);
+
+  /* ---------- WHITE SCALE ---------- */
+  --white-87: rgba(255,255,255,0.87);
+  --white-72: rgba(255,255,255,0.72);
+  --white-60: rgba(255,255,255,0.60);
+  --white-54: rgba(255,255,255,0.54);
+  --white-38: rgba(255,255,255,0.38);
+  --white-24: rgba(255,255,255,0.24);
+  --white-12: rgba(255,255,255,0.12);
+  --white-8:  rgba(255,255,255,0.08);
+  --white-6:  rgba(255,255,255,0.06);
+  --white-4:  rgba(255,255,255,0.04);
+
+  /* ---------- SURFACES ---------- */
+  --surface: #FFFFFF;
+  --surface-2: #F6F8FD; /* same as --blue-50 — used for input wells, secondary surfaces */
+  --surface-3: #F1F2F8; /* neutral-100 */
+  --canvas: #FFFFFF;
+
+  /* ---------- FOREGROUND / TEXT ---------- */
+  --fg-1: var(--black-87);   /* Primary text */
+  --fg-2: var(--black-72);   /* Body / icons */
+  --fg-3: var(--black-60);   /* Secondary */
+  --fg-4: var(--black-38);   /* Tertiary / disabled label */
+  --fg-on-brand: #FFFFFF;
+  --link: var(--blue-500);
+
+  /* ---------- BORDERS ---------- */
+  --border-1: rgba(32,33,36,0.08); /* Hairline */
+  --border-2: rgba(32,33,36,0.12); /* Card outline */
+  --border-strong: rgba(32,33,36,0.24);
+
+  /* ---------- RADII ---------- */
+  --r-4:  4px;  /* tag / micro */
+  --r-8:  8px;  /* swatch / chip-square */
+  --r-12: 12px; /* small cards */
+  --r-16: 16px; /* default card / tile elevation */
+  --r-20: 20px; /* app icon */
+  --r-24: 24px; /* large card / section */
+  --r-32: 32px; /* hero */
+  --r-pill: 999px;
+
+  /* ---------- SHADOWS ---------- */
+  /* Tile object / button volume — the canonical 1px lift */
+  --shadow-volume: 0 1px 0 0 rgba(0,0,0,0.06);
+  /* Tile outline — for elevated white cards on a white bg */
+  --shadow-outline: 0 0 0 1px rgba(32,33,36,0.06), 0 1px 0 0 rgba(0,0,0,0.06);
+  /* Elevated dialog / sheet */
+  --shadow-elev: 0 4px 4px 0 rgba(0,0,0,0.25);
+  /* Focus ring (accessibility) */
+  --shadow-focus: 0 0 0 4px rgba(32,33,36,0.24);
+
+  /* ---------- BLURS ---------- */
+  --blur-sm: 24px;  /* dialogs, small overlays */
+  --blur-lg: 80px;  /* bottom bars, full-bleed navigation overlays */
+
+  /* ---------- SPACING (4px base) ---------- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* ---------- TYPOGRAPHY ---------- */
+  /* Silpo Rounded — friendly display variant, used on hero / brand surfaces.
+     Silpo Text — workhorse UI face. Both shipped from /fonts. */
+  --font-display: "Silpo Rounded", "Silpo Text", system-ui, -apple-system, sans-serif;
+  --font-text:    "Silpo Text", system-ui, -apple-system, sans-serif;
+  --font-caption: "Silpo Text Caption", "Silpo Text", system-ui, -apple-system, sans-serif;
+  --font-mono:    "Inter", ui-monospace, monospace;
+
+  /* Type scale found in production:
+     12 / 13 / 14 / 16 / 18 / 20 / 22 / 24 / 32 / 42 / 48 / 64 */
+  --t-12: 12px;
+  --t-13: 13px;
+  --t-14: 14px;
+  --t-16: 16px;
+  --t-18: 18px;
+  --t-20: 20px;
+  --t-22: 22px;
+  --t-24: 24px;
+  --t-32: 32px;
+  --t-42: 42px;
+  --t-48: 48px;
+  --t-64: 64px;
+
+  /* Motion */
+  --easing: cubic-bezier(.2,.7,.2,1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+}
+
+/* =========================================================================
+   Semantic type styles — match the production Silpo type scale.
+   Weights: 400 Regular, 500 Medium, 600 SemiBold, 700 Bold, 800 ExtraBold, 900 Black.
+   ========================================================================= */
+
+html, body {
+  font-family: var(--font-text);
+  color: var(--fg-1);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.silpo-display-xl { font-family: var(--font-display); font-weight: 700; font-size: var(--t-42); line-height: 1.2; letter-spacing: -0.01em; color: var(--fg-1); }
+.silpo-display    { font-family: var(--font-display); font-weight: 700; font-size: var(--t-32); line-height: 1.25; letter-spacing: -0.005em; color: var(--fg-1); }
+.silpo-h1         { font-family: var(--font-display); font-weight: 700; font-size: var(--t-24); line-height: 1.25; color: var(--fg-1); }
+.silpo-h2         { font-family: var(--font-display); font-weight: 700; font-size: var(--t-22); line-height: 1.27; color: var(--fg-1); }
+.silpo-h3         { font-family: var(--font-display); font-weight: 700; font-size: var(--t-20); line-height: 1.2;  color: var(--fg-1); }
+.silpo-section    { font-family: var(--font-display); font-weight: 700; font-size: var(--t-18); line-height: 1.33; color: var(--fg-1); }
+.silpo-strong-md  { font-family: var(--font-text);    font-weight: 700; font-size: var(--t-16); line-height: 1.4;  color: var(--fg-1); } /* Button/Bold body */
+.silpo-body       { font-family: var(--font-text);    font-weight: 400; font-size: var(--t-16); line-height: 1.4;  color: var(--fg-1); }
+.silpo-body-sm    { font-family: var(--font-text);    font-weight: 400; font-size: var(--t-14); line-height: 1.4;  color: var(--fg-1); }
+.silpo-label      { font-family: var(--font-text);    font-weight: 600; font-size: var(--t-14); line-height: 1.4;  color: var(--fg-1); } /* SemiBold label */
+.silpo-caption    { font-family: var(--font-caption);  font-weight: 400; font-size: var(--t-13); line-height: 1.3;  color: var(--fg-2); }
+.silpo-micro      { font-family: var(--font-caption);  font-weight: 500; font-size: var(--t-12); line-height: 1.33; color: var(--fg-2); }
+.silpo-button-lg  { font-family: var(--font-text);    font-weight: 700; font-size: var(--t-16); line-height: 1.4;  letter-spacing: 0; }
+.silpo-button-md  { font-family: var(--font-text);    font-weight: 700; font-size: var(--t-14); line-height: 1.4;  letter-spacing: 0; }
+.silpo-price      { font-family: var(--font-display); font-weight: 700; font-size: var(--t-20); line-height: 1.2;  color: var(--fg-1); }
+.silpo-price-lg   { font-family: var(--font-display); font-weight: 700; font-size: var(--t-32); line-height: 1.0;  color: var(--fg-1); letter-spacing: -0.01em; }
+
+/* Selection — orange tint */
+::selection { background: var(--orange-200); color: var(--fg-1); }
