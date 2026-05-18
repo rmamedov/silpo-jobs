@@ -297,10 +297,17 @@ input,select,textarea{font:inherit}
 .toast.show{transform:translateX(0)}
 .toast.success{border-left:4px solid var(--green)}
 
+/* FILTER TOGGLE MOBILE */
+.filter-toggle{display:none;align-items:center;gap:8px;padding:10px 20px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:600;color:var(--dark);background:#fff;cursor:pointer;margin-bottom:16px}
+.filter-toggle svg{width:18px;height:18px}
+.filter-toggle .filter-count{background:var(--green);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;margin-left:auto}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   .vac-layout{grid-template-columns:1fr}
-  .vac-filters{position:static}
+  .vac-filters{position:static;display:none;padding:16px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px}
+  .vac-filters.open{display:block}
+  .filter-toggle{display:flex}
   .detail-layout{grid-template-columns:1fr}
   .similar-grid{grid-template-columns:1fr}
 }
@@ -901,7 +908,11 @@ const App = {
         <div class="vac-page-header"><h1>Вакансії</h1><div class="vac-count">Знайдено: <strong>${total}</strong></div></div>
         ${activeFilters.length?`<div class="active-filters">${activeFilters.map(af=>`<span class="active-filter">${af.label}<span class="remove" onclick="App.removeFilter('${af.key}','${af.val||''}')">&times;</span></span>`).join('')}<button class="btn-reset" onclick="App.resetFilters()">Скинути всі</button></div>`:''}
         <div class="vac-layout">
-          <aside class="vac-filters">
+          <button class="filter-toggle" onclick="App.toggleMobileFilters()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+            Фільтри${activeFilters.length?`<span class="filter-count">${activeFilters.length}</span>`:''}
+          </button>
+          <aside class="vac-filters" id="vacFilters">
             <div class="filter-group"><h4>Категорія</h4>
               ${['Магазин','Склад','Офіс','Кур\'єр'].map(c=>`<label><input type="checkbox" value="${c}" ${f.category===c?'checked':''} onchange="App.toggleCategory('${c}')"> ${c} <span class="cnt">${VACANCIES.filter(v=>v.category===c).length}</span></label>`).join('')}
             </div>
@@ -952,6 +963,11 @@ const App = {
   },
 
   bindVacancies() {},
+
+  toggleMobileFilters() {
+    const el = document.getElementById('vacFilters');
+    if (el) el.classList.toggle('open');
+  },
 
   toggleFilter(key, val) {
     const arr = this.filters[key];
