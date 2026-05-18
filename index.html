@@ -29,6 +29,21 @@ input,select,textarea{font:inherit}
 .header-search input{width:100%;padding:8px 16px 8px 36px;border:1px solid var(--border);border-radius:var(--radius-pill);font-size:14px;outline:none;transition:border-color .2s}
 .header-search input:focus{border-color:var(--green)}
 .header-search::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px}
+
+/* AUTOSUGGEST */
+.autosuggest{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;max-height:360px;overflow-y:auto;display:none}
+.autosuggest.open{display:block}
+.autosuggest-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--bg-light)}
+.autosuggest-item:last-child{border-bottom:none}
+.autosuggest-item:hover,.autosuggest-item.selected{background:var(--green-light)}
+.autosuggest-item .as-icon{width:36px;height:36px;border-radius:8px;background:var(--bg-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.autosuggest-item .as-info{flex:1;min-width:0}
+.autosuggest-item .as-title{font-size:14px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.autosuggest-item .as-title mark{background:var(--green-light);color:var(--green-dark);border-radius:2px;padding:0 1px}
+.autosuggest-item .as-meta{font-size:12px;color:var(--text-light);display:flex;gap:8px;margin-top:2px}
+.autosuggest-item .as-salary{font-size:13px;font-weight:700;color:var(--green);white-space:nowrap;flex-shrink:0}
+.autosuggest-hint{padding:10px 16px;font-size:12px;color:var(--text-light);text-align:center}
+.search-wrap{position:relative}
 .header-right{display:flex;align-items:center;gap:16px;margin-left:auto;font-size:14px;color:var(--text-light)}
 .header-right .user{display:flex;align-items:center;gap:8px}
 .header-right .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
@@ -317,8 +332,13 @@ input,select,textarea{font:inherit}
 <header class="header">
   <div class="header-inner">
     <div class="logo" onclick="App.navigate('home')">Сільпо</div>
-    <div class="header-search">
-      <input type="text" placeholder="Посада або адреса" id="headerSearch" onkeydown="if(event.key==='Enter'){App.searchFromHeader()}">
+    <div class="header-search search-wrap">
+      <input type="text" placeholder="Посада або адреса" id="headerSearch" autocomplete="off"
+        oninput="App.onSearchInput(this,'headerSuggest')"
+        onkeydown="App.onSearchKeydown(event,'headerSuggest')"
+        onfocus="App.onSearchInput(this,'headerSuggest')"
+      >
+      <div class="autosuggest" id="headerSuggest"></div>
     </div>
     <div class="header-right">
       <span>📍 Київ, вул. Авіаконструктора...</span>
@@ -425,6 +445,14 @@ const App = {
     document.getElementById('modalOverlay').addEventListener('click', e => {
       if (e.target === e.currentTarget) this.closeModal();
     });
+    // Close autosuggest on outside click
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrap')) {
+        document.querySelectorAll('.autosuggest').forEach(el => {
+          el.classList.remove('open'); el.innerHTML = '';
+        });
+      }
+    });
   },
 
   bindNav() {
@@ -496,6 +524,139 @@ const App = {
 
   searchFromHeader() {
     const val = document.getElementById('headerSearch').value.trim();
+    this.closeSuggest('headerSuggest');
+    this.filters.search = val;
+    this.vacPage = 1;
+    this.navigate('vacancies');
+  },
+
+  // ============ AUTOSUGGEST ============
+  _suggestIdx: -1,
+
+  buildSuggestResults(query) {
+    if (!query || query.length < 3) return [];
+    const q = query.toLowerCase();
+    // tokenize query for full-text matching
+    const tokens = q.split(/\s+/).filter(t => t.length > 0);
+    const scored = VACANCIES.map(v => {
+      const title = v.title.toLowerCase();
+      let score = 0;
+      // exact substring match in title — highest priority
+      if (title.includes(q)) score += 100;
+      // each token match
+      tokens.forEach(t => { if (title.includes(t)) score += 30; });
+      // match at start of words in title
+      const words = title.split(/\s+/);
+      tokens.forEach(t => { words.forEach(w => { if (w.startsWith(t)) score += 20; }); });
+      return { vacancy: v, score };
+    }).filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 7);
+    return scored.map(x => x.vacancy);
+  },
+
+  highlightMatch(text, query) {
+    if (!query || query.length < 3) return text;
+    const tokens = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+    let result = text;
+    tokens.forEach(t => {
+      const regex = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      result = result.replace(regex, '<mark>$1</mark>');
+    });
+    return result;
+  },
+
+  renderSuggest(results, query, suggestId) {
+    if (!results.length) {
+      return '<div class="autosuggest-hint">Нічого не знайдено</div>';
+    }
+    const catIcons = {'Магазин':'🏪','Склад':'📦','Офіс':'🏢','Кур\'єр':'🛵'};
+    return results.map((v, i) => `
+      <div class="autosuggest-item${i === this._suggestIdx ? ' selected' : ''}"
+        onmousedown="App.selectSuggest(${v.id},'${suggestId}')"
+        onmouseenter="App._suggestIdx=${i};App.updateSuggestHighlight('${suggestId}')">
+        <div class="as-icon">${catIcons[v.category]||'📋'}</div>
+        <div class="as-info">
+          <div class="as-title">${this.highlightMatch(v.title, query)}</div>
+          <div class="as-meta"><span>📍 ${v.city}</span><span>${v.category}</span></div>
+        </div>
+        <div class="as-salary">від ${v.salary.toLocaleString('uk')} грн</div>
+      </div>
+    `).join('');
+  },
+
+  onSearchInput(input, suggestId) {
+    const q = input.value.trim();
+    const el = document.getElementById(suggestId);
+    if (!el) return;
+    this._suggestIdx = -1;
+    if (q.length < 3) {
+      el.classList.remove('open');
+      el.innerHTML = '';
+      return;
+    }
+    const results = this.buildSuggestResults(q);
+    el.innerHTML = this.renderSuggest(results, q, suggestId);
+    el.classList.add('open');
+    this._currentSuggestResults = results;
+    this._currentSuggestId = suggestId;
+  },
+
+  onSearchKeydown(e, suggestId) {
+    const el = document.getElementById(suggestId);
+    if (!el || !el.classList.contains('open')) {
+      if (e.key === 'Enter') {
+        this.doFullSearch(e.target);
+      }
+      return;
+    }
+    const results = this._currentSuggestResults || [];
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this._suggestIdx = Math.min(this._suggestIdx + 1, results.length - 1);
+      this.updateSuggestHighlight(suggestId);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this._suggestIdx = Math.max(this._suggestIdx - 1, -1);
+      this.updateSuggestHighlight(suggestId);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (this._suggestIdx >= 0 && results[this._suggestIdx]) {
+        this.selectSuggest(results[this._suggestIdx].id, suggestId);
+      } else {
+        this.closeSuggest(suggestId);
+        this.doFullSearch(e.target);
+      }
+    } else if (e.key === 'Escape') {
+      this.closeSuggest(suggestId);
+    }
+  },
+
+  updateSuggestHighlight(suggestId) {
+    const el = document.getElementById(suggestId);
+    if (!el) return;
+    el.querySelectorAll('.autosuggest-item').forEach((item, i) => {
+      item.classList.toggle('selected', i === this._suggestIdx);
+    });
+    // scroll selected into view
+    const sel = el.querySelector('.autosuggest-item.selected');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+  },
+
+  selectSuggest(vacId, suggestId) {
+    this.closeSuggest(suggestId);
+    this.navigate('detail', vacId);
+  },
+
+  closeSuggest(suggestId) {
+    const el = document.getElementById(suggestId);
+    if (el) { el.classList.remove('open'); el.innerHTML = ''; }
+    this._suggestIdx = -1;
+    this._currentSuggestResults = [];
+  },
+
+  doFullSearch(input) {
+    const val = input.value.trim();
     this.filters.search = val;
     this.vacPage = 1;
     this.navigate('vacancies');
@@ -535,7 +696,14 @@ const App = {
         <div class="card-preview" style="margin-top:24px"><h4>🛵 Кур'єр</h4><p style="font-size:12px;opacity:.7;margin:4px 0">Харків, Салтівка</p><div class="salary">від 28 000 грн</div></div>
       </div></div></section>
       <div class="search-section"><div class="search-bar">
-        <input type="text" placeholder="🔍 Посада або адреса" id="homeSearch">
+        <div class="search-wrap" style="flex:1">
+          <input type="text" placeholder="🔍 Посада або адреса" id="homeSearch" autocomplete="off"
+            oninput="App.onSearchInput(this,'homeSuggest')"
+            onkeydown="App.onSearchKeydown(event,'homeSuggest')"
+            onfocus="App.onSearchInput(this,'homeSuggest')"
+          >
+          <div class="autosuggest" id="homeSuggest"></div>
+        </div>
         <select id="homeCity"><option value="">Всі міста</option>${CITIES.map(c=>`<option>${c}</option>`).join('')}</select>
         <button class="btn-search" onclick="App.homeSearch()">Знайти</button>
       </div></div>
@@ -648,7 +816,14 @@ const App = {
               <option value="salaryUp" ${f.sort==='salaryUp'?'selected':''}>За зарплатою ↑</option>
               <option value="salaryDown" ${f.sort==='salaryDown'?'selected':''}>За зарплатою ↓</option>
             </select></div>
-            <input type="text" placeholder="🔍 Пошук..." value="${f.search}" id="vacSearch" style="padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;width:220px" oninput="App.liveSearch(this.value)">
+            <div class="search-wrap" style="width:260px">
+              <input type="text" placeholder="🔍 Пошук..." value="${f.search}" id="vacSearch" autocomplete="off" style="padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;width:100%"
+                oninput="App.onSearchInput(this,'vacSuggest');App.liveSearch(this.value)"
+                onkeydown="App.onSearchKeydown(event,'vacSuggest')"
+                onfocus="App.onSearchInput(this,'vacSuggest')"
+              >
+              <div class="autosuggest" id="vacSuggest"></div>
+            </div>
             </div>
             <div class="vacancies-grid">${paged.length?paged.map(v=>this.renderVacancyCard(v,'fade-in')).join(''):`<div class="no-results" style="grid-column:1/-1"><p style="font-size:48px;margin-bottom:16px">🔍</p><p>За вашим запитом нічого не знайдено</p><p style="margin-top:8px"><button class="btn-primary" onclick="App.resetFilters()">Скинути фільтри</button></p></div>`}</div>
             ${totalPages>1?`<div class="pagination">
