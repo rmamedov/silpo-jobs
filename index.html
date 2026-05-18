@@ -215,6 +215,13 @@ input,select,textarea{font:inherit}
 .vac-page-header h1{font-size:28px;font-weight:800;color:var(--dark)}
 .vac-count{font-size:14px;color:var(--text-light)}
 .vac-count strong{color:var(--green);font-size:20px}
+.quick-filters{display:flex;gap:0;margin-bottom:24px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.quick-filter{flex:1;padding:14px 20px;font-size:14px;font-weight:600;color:var(--text);background:#fff;cursor:pointer;text-align:center;transition:all .2s;border:none;border-right:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.quick-filter:last-child{border-right:none}
+.quick-filter:hover{background:var(--bg-light)}
+.quick-filter.active{background:var(--dark);color:#fff}
+.quick-filter .qf-icon{font-size:16px}
+@media(max-width:768px){.quick-filters{overflow-x:auto;-webkit-overflow-scrolling:touch}.quick-filter{padding:12px 16px;font-size:13px;min-width:max-content}}
 .vac-layout{display:grid;grid-template-columns:280px 1fr;gap:32px}
 .vac-filters{position:sticky;top:130px;align-self:start}
 .filter-group{margin-bottom:24px}
@@ -906,6 +913,11 @@ const App = {
     return `<div class="page-view active fade-in">
       <div class="vac-page">
         <div class="vac-page-header"><h1>Вакансії</h1><div class="vac-count">Знайдено: <strong>${total}</strong></div></div>
+        <div class="quick-filters">
+          ${[{key:'',label:'Всі напрями',icon:''},{key:'Магазин',label:'Магазин та склад',icon:'🏪'},{key:'Офіс',label:'Офіс Сільпо',icon:'🏢'},{key:"Кур'єр",label:"Кур'єри",icon:'🛵'},{key:'Склад',label:'Склад',icon:'📦'}].map(q=>
+            `<button class="quick-filter${f.category===q.key?' active':''}" onclick="App.setQuickFilter('${q.key}')">${q.icon?`<span class="qf-icon">${q.icon}</span>`:''}${q.label}</button>`
+          ).join('')}
+        </div>
         ${activeFilters.length?`<div class="active-filters">${activeFilters.map(af=>`<span class="active-filter">${af.label}<span class="remove" onclick="App.removeFilter('${af.key}','${af.val||''}')">&times;</span></span>`).join('')}<button class="btn-reset" onclick="App.resetFilters()">Скинути всі</button></div>`:''}
         <div class="vac-layout">
           <button class="filter-toggle" onclick="App.toggleMobileFilters()">
@@ -973,6 +985,12 @@ const App = {
     const arr = this.filters[key];
     const idx = arr.indexOf(val);
     if (idx>=0) arr.splice(idx,1); else arr.push(val);
+    this.vacPage = 1;
+    this.navigate('vacancies');
+  },
+
+  setQuickFilter(cat) {
+    this.filters.category = cat;
     this.vacPage = 1;
     this.navigate('vacancies');
   },
