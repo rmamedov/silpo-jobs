@@ -403,9 +403,25 @@ const App = {
   perPage: 9,
   hotCity: 'Всі',
 
+  _skipPush: false,
+
   init() {
     this.bindNav();
-    this.navigate('home');
+    // Listen for browser back/forward
+    window.addEventListener('popstate', (e) => {
+      if (e.state) {
+        this._skipPush = true;
+        this.filters = e.state.filters ? JSON.parse(JSON.stringify(e.state.filters)) : this.filters;
+        this.vacPage = e.state.vacPage || 1;
+        this.hotCity = e.state.hotCity || 'Всі';
+        this.renderPage(e.state.page, e.state.data);
+        this._skipPush = false;
+      }
+    });
+    // Initial page from URL hash or default to home
+    const hash = location.hash.replace('#','');
+    const startPage = hash && ['home','vacancies','courier','about'].includes(hash) ? hash : 'home';
+    this.navigate(startPage);
     document.getElementById('modalOverlay').addEventListener('click', e => {
       if (e.target === e.currentTarget) this.closeModal();
     });
@@ -418,6 +434,22 @@ const App = {
   },
 
   navigate(page, data) {
+    // Push state to browser history
+    if (!this._skipPush) {
+      const state = {
+        page,
+        data: data || null,
+        filters: JSON.parse(JSON.stringify(this.filters)),
+        vacPage: this.vacPage,
+        hotCity: this.hotCity
+      };
+      const hash = '#' + page + (data ? '/' + data : '');
+      history.pushState(state, '', hash);
+    }
+    this.renderPage(page, data);
+  },
+
+  renderPage(page, data) {
     this.currentPage = page;
     document.querySelectorAll('#mainNav a').forEach(a => {
       a.classList.toggle('active', a.dataset.page === page);
