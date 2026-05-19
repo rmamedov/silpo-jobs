@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Сільпо — Вакансії</title>
 <style>
 /* =========================================================================
@@ -235,14 +235,11 @@ input, select, textarea { font: inherit; }
   color: var(--fg-1);
   white-space: nowrap; cursor: pointer;
 }
-.logo .logo-tile {
-  width: 36px; height: 36px;
-  border-radius: var(--r-12);
-  background: var(--orange-500);
-  display: grid; place-items: center;
-  color: #fff;
+.logo .logo-img {
+  height: 32px;
+  width: auto;
 }
-.logo .logo-tile svg { width: 22px; height: 22px; }
+.logo .logo-img svg { height: 100%; width: auto; display: block; }
 .logo .logo-suffix {
   font-family: var(--font-text);
   font-size: var(--t-13);
@@ -357,6 +354,7 @@ textarea.silpo-input {
   border: 0; outline: none;
   font-size: inherit; color: inherit;
   font-family: inherit;
+  text-overflow: ellipsis;
 }
 .silpo-input::placeholder, .silpo-input input::placeholder { color: var(--black-60); }
 .silpo-input:focus-within,
@@ -602,6 +600,12 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
   margin-bottom: var(--s-6);
   max-width: 540px;
 }
+.hero-cta-row{display:flex;align-items:center;gap:var(--s-5);margin-bottom:var(--s-6);flex-wrap:wrap}
+.hero-cta-btn{display:inline-flex;align-items:center;gap:var(--s-2);background:#fff;color:var(--orange-600);font-family:var(--font-display);font-weight:800;font-size:var(--t-18);padding:14px 28px;border-radius:var(--r-pill);border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.15);transition:transform var(--dur) var(--easing),box-shadow var(--dur) var(--easing)}
+.hero-cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.hero-cta-arrow{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--orange-500);color:#fff;font-size:18px;margin-left:4px}
+.hero-cta-hint{display:inline-flex;align-items:center;gap:6px;color:var(--white-87);font-size:var(--t-14);font-weight:500}
+.green-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0}
 .hero-search {
   display: flex; gap: var(--s-2);
   background: #fff;
@@ -1032,9 +1036,31 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 }
 .filter-row input[type=checkbox] { accent-color: var(--blue-500); width: 16px; height: 16px; }
 .filter-row .cnt { margin-left: auto; font-size: var(--t-12); color: var(--fg-3); }
-.filter-salary-row { display: flex; gap: var(--s-2); }
-.filter-salary-row .silpo-input { padding: 8px 12px; font-size: var(--t-13); border-radius: var(--r-12); }
+.salary-slider-wrap { padding: 4px 0; }
+.salary-slider-vals { display: flex; justify-content: space-between; font-size: var(--t-13); font-weight: 600; color: var(--fg-1); margin-bottom: 12px; }
+.salary-slider-vals span { background: var(--blue-50); padding: 4px 10px; border-radius: var(--r-pill); color: var(--blue-600); font-family: var(--font-display); }
+.dual-range { position: relative; height: 6px; margin: 8px 0 4px; }
+.dual-range .track { position: absolute; top: 0; left: 0; right: 0; height: 6px; border-radius: 3px; background: var(--surface-3); }
+.dual-range .track-fill { position: absolute; top: 0; height: 6px; background: var(--blue-500); border-radius: 3px; }
+.dual-range input[type=range] {
+  position: absolute; top: -7px; width: 100%; height: 20px;
+  -webkit-appearance: none; appearance: none;
+  background: transparent; pointer-events: none; margin: 0;
+}
+.dual-range input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0 3px var(--blue-500), var(--shadow-volume);
+  cursor: pointer; pointer-events: auto;
+}
+.dual-range input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0 3px var(--blue-500), var(--shadow-volume);
+  cursor: pointer; pointer-events: auto; border: 0;
+}
+.salary-slider-marks { display: flex; justify-content: space-between; font-size: var(--t-12); color: var(--fg-3); margin-top: 6px; }
 .filter-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-apply-btn { display: none; }
 
 /* Active filter pills */
 .active-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: var(--s-4); }
@@ -1221,11 +1247,22 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;justify-content:center;align-items:center;padding:var(--s-6)}
 .modal-overlay.open{display:flex}
 .modal{background:#fff;border-radius:var(--r-24);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative}
-.modal-header{display:flex;justify-content:space-between;align-items:center;padding:var(--s-5) var(--s-6);border-bottom:1px solid var(--border-1)}
-.modal-header h3{font-family:var(--font-display);font-size:var(--t-18);font-weight:700}
-.modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;border:none;color:var(--fg-2)}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:var(--s-5) var(--s-6);border-bottom:1px solid var(--border-1)}
+.modal-header-text{flex:1}
+.modal-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--fg-3);display:block;margin-bottom:4px}
+.modal-header h3{font-family:var(--font-display);font-size:var(--t-22);font-weight:800}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;border:none;color:var(--fg-2);flex-shrink:0;margin-top:4px}
 .modal-close:hover{background:var(--neutral-200)}
 .modal-body{padding:var(--s-6)}
+.phone-input-wrap{display:flex;align-items:center;background:var(--surface-2);border-radius:var(--r-16);box-shadow:inset 0 0 0 1px transparent;transition:box-shadow var(--dur) var(--easing),background var(--dur) var(--easing)}
+.phone-input-wrap:focus-within{background:#fff;box-shadow:inset 0 0 0 2px var(--blue-500)}
+.phone-prefix{padding:12px var(--s-4);font-size:var(--t-12);color:var(--fg-3);white-space:nowrap;border-right:1px solid var(--border-1);line-height:1.3}
+.phone-field{border-radius:0 var(--r-16) var(--r-16) 0!important;box-shadow:none!important;background:transparent!important}
+.resume-upload{display:flex;align-items:center;gap:var(--s-3);padding:14px var(--s-5);background:var(--surface-2);border-radius:var(--r-16);cursor:pointer;transition:background var(--dur) var(--easing);color:var(--fg-2);font-size:var(--t-14)}
+.resume-upload:hover{background:var(--neutral-200)}
+.resume-upload svg{color:var(--fg-3);flex-shrink:0}
+.resume-upload.has-file{background:var(--green-100);color:var(--green-700)}
+.resume-upload.has-file svg{color:var(--green-600)}
 .form-group{display:flex;flex-direction:column;gap:var(--s-1);margin-bottom:var(--s-4)}
 .form-group .floating-label,.form-group label{font-size:var(--t-12);font-weight:600;color:var(--fg-2);padding:0 2px}
 .form-group .hint{font-size:var(--t-12);color:var(--fg-2);padding:0 2px}
@@ -1315,9 +1352,89 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 }
 
 /* =========================================================================
+   CALCULATOR PAGE
+   ========================================================================= */
+.calc-hero{background:var(--orange-500);color:#fff;padding:var(--s-10) 0 calc(var(--s-12) + 64px);position:relative;overflow:hidden}
+.calc-hero::after{content:'💰';position:absolute;right:-40px;bottom:-80px;font-size:320px;line-height:1;opacity:.08}
+.calc-hero-inner{max-width:var(--max-w);margin:0 auto;padding:0 var(--s-6);position:relative;z-index:1}
+.calc-hero h1{font-family:var(--font-display);font-weight:800;font-size:var(--t-48);line-height:1.1;letter-spacing:-0.01em;margin-bottom:var(--s-3);max-width:720px}
+.calc-hero p{font-size:var(--t-18);color:var(--white-87);max-width:600px}
+.calc-wrap{max-width:var(--max-w);margin:-64px auto 0;padding:0 var(--s-6) var(--s-12);position:relative;z-index:5}
+.calc-card{background:#fff;border-radius:var(--r-24);box-shadow:0 8px 32px rgba(0,0,0,.12),0 0 0 1px var(--black-6);display:grid;grid-template-columns:1.1fr 1fr;overflow:hidden;min-height:660px}
+.calc-inputs{padding:var(--s-8);border-right:1px solid var(--border-1);display:flex;flex-direction:column;gap:var(--s-6)}
+.calc-step .lab{display:flex;align-items:center;gap:var(--s-2);font-size:var(--t-12);font-weight:700;color:var(--fg-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:var(--s-3)}
+.calc-step .lab .num{width:22px;height:22px;border-radius:50%;background:var(--orange-500);color:#fff;display:grid;place-items:center;font-size:var(--t-12);font-weight:800}
+.role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-2)}
+.role-pill{display:flex;align-items:center;gap:var(--s-3);padding:12px 14px;border:1px solid var(--border-2);border-radius:var(--r-12);background:#fff;cursor:pointer;text-align:left;transition:all var(--dur) var(--easing)}
+.role-pill:hover{border-color:var(--blue-300)}
+.role-pill.on{border:2px solid var(--blue-500);background:var(--blue-50);padding:11px 13px}
+.role-pill .ico{width:40px;height:40px;border-radius:var(--r-12);display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.role-pill .nm{font-weight:700;font-size:var(--t-14)}
+.role-pill .bs{font-size:var(--t-12);color:var(--fg-3);margin-top:2px}
+.seg{display:flex;background:var(--surface-2);border-radius:var(--r-pill);padding:4px;gap:3px}
+.seg button{flex:1;padding:9px 12px;font-size:var(--t-13);font-weight:700;color:var(--fg-3);border-radius:var(--r-pill)}
+.seg button.on{background:var(--blue-500);color:#fff}
+.slider-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--s-3)}
+.slider-row .v{font-family:var(--font-display);font-weight:800;font-size:var(--t-24)}
+.slider-row .v small{font-size:var(--t-13);color:var(--fg-3);font-weight:500;margin-left:4px}
+.slider-row .hint{font-size:var(--t-12);color:var(--fg-3)}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:var(--surface-3);border-radius:3px;outline:none;cursor:pointer}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px var(--blue-500),var(--shadow-volume);cursor:pointer}
+.slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px var(--blue-500),var(--shadow-volume);cursor:pointer;border:0}
+.slider-marks{display:flex;justify-content:space-between;margin-top:8px;font-size:var(--t-12);color:var(--fg-3)}
+.toggle-list{display:flex;flex-direction:column;gap:var(--s-2)}
+.toggle-row{display:flex;align-items:center;gap:var(--s-3);padding:12px 14px;border:1px solid var(--border-1);border-radius:var(--r-12);cursor:pointer;transition:all var(--dur) var(--easing)}
+.toggle-row:hover{border-color:var(--black-24)}
+.toggle-row.on{background:var(--blue-50);border-color:var(--blue-500)}
+.toggle-row .info{flex:1}
+.toggle-row .info h5{font-size:var(--t-14);font-weight:700;margin-bottom:2px}
+.toggle-row .info p{font-size:var(--t-12);color:var(--fg-2)}
+.toggle-row .amt{font-family:var(--font-display);font-weight:700;font-size:var(--t-14);color:var(--green-700);white-space:nowrap}
+.toggle-row .switch{width:40px;height:24px;background:var(--surface-3);border-radius:12px;position:relative;transition:background var(--dur) var(--easing);flex-shrink:0}
+.toggle-row .switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;box-shadow:var(--shadow-volume);transition:left var(--dur) var(--easing)}
+.toggle-row.on .switch{background:var(--blue-500)}
+.toggle-row.on .switch::after{left:19px}
+.city-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.city-pill{padding:9px 4px;border:1px solid var(--border-2);border-radius:var(--r-12);font-size:var(--t-13);font-weight:600;color:var(--fg-1);text-align:center;cursor:pointer;transition:all var(--dur) var(--easing)}
+.city-pill.on{background:var(--blue-500);color:#fff;border-color:var(--blue-500)}
+.city-pill .mult{display:block;font-size:var(--t-12);opacity:0.7;font-weight:500;margin-top:2px}
+.calc-result{padding:var(--s-8);background:linear-gradient(180deg,var(--orange-100) 0%,#fff 50%);display:flex;flex-direction:column}
+.r-label{font-size:var(--t-12);font-weight:700;color:var(--fg-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:var(--s-2)}
+.r-total{font-family:var(--font-display);font-weight:800;font-size:64px;line-height:1;letter-spacing:-0.02em;margin-bottom:4px}
+.r-total .cur{font-size:var(--t-24);color:var(--fg-3);margin-left:8px;font-weight:700}
+.r-period{font-size:var(--t-14);color:var(--fg-2);margin-bottom:var(--s-4)}
+.r-period strong{color:var(--blue-500);font-weight:700}
+.r-comp{display:flex;align-items:center;gap:10px;background:var(--green-100);color:var(--green-700);padding:12px 16px;border-radius:var(--r-12);font-size:var(--t-13);margin-bottom:var(--s-5)}
+.r-comp .ico{width:28px;height:28px;border-radius:50%;background:var(--green-500);color:#fff;display:grid;place-items:center;font-size:14px;flex-shrink:0}
+.bk-bar{height:14px;border-radius:7px;background:var(--surface-3);overflow:hidden;display:flex;margin-bottom:var(--s-3)}
+.bk-bar>div{height:100%;transition:width var(--dur-slow) var(--easing)}
+.bk-base{background:var(--blue-500)}
+.bk-bonus{background:var(--blue-300)}
+.bk-city{background:var(--orange-400)}
+.bk-extra{background:var(--violet-400)}
+.bk-list{display:flex;flex-direction:column;gap:8px;margin-bottom:var(--s-5)}
+.bk-row{display:flex;align-items:center;gap:10px;font-size:var(--t-13)}
+.bk-row .dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.bk-row .lb{flex:1;color:var(--fg-2)}
+.bk-row .amt{font-family:var(--font-display);font-weight:700;color:var(--fg-1)}
+.forecast{background:var(--fg-1);color:#fff;border-radius:var(--r-16);padding:var(--s-5);margin-bottom:var(--s-4)}
+.forecast h4{font-family:var(--font-text);font-size:var(--t-12);color:var(--white-60);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;margin-bottom:var(--s-3)}
+.forecast .yg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--s-3)}
+.forecast .ycell .yv{font-family:var(--font-display);font-weight:800;font-size:var(--t-20);color:var(--orange-400);margin-bottom:2px}
+.forecast .ycell .yl{font-size:var(--t-12);color:var(--white-60);font-weight:600}
+.r-ctas{display:flex;gap:8px;margin-top:auto}
+.r-ctas .btn-primary{flex:1}
+.calc-extras{max-width:var(--max-w);margin:0 auto;padding:var(--s-6) var(--s-6) var(--s-16)}
+.extras-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3)}
+.ec{background:#fff;border-radius:var(--r-16);box-shadow:var(--shadow-volume),0 0 0 1px var(--black-6);padding:var(--s-5)}
+.ec .ico{width:48px;height:48px;border-radius:var(--r-12);display:grid;place-items:center;font-size:24px;margin-bottom:var(--s-3)}
+.ec h4{font-family:var(--font-display);font-weight:700;font-size:var(--t-18);margin-bottom:4px}
+.ec p{font-size:var(--t-13);color:var(--fg-2);line-height:1.5}
+
+/* =========================================================================
    MOBILE NAV
    ========================================================================= */
-.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border-1);z-index:100;padding:var(--s-2) 0 max(var(--s-2),env(safe-area-inset-bottom))}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border-1);box-shadow:0 -2px 12px rgba(0,0,0,.08);z-index:100;padding:var(--s-2) 0 max(var(--s-2),env(safe-area-inset-bottom))}
 .mobile-nav-inner{display:flex;justify-content:space-around}
 .mobile-nav a{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--fg-3);gap:4px;padding:4px var(--s-2);cursor:pointer}
 .mobile-nav a.active{color:var(--blue-500)}
@@ -1344,6 +1461,90 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 .page-view{display:none}
 .page-view.active{display:block}
 
+/* ===== STORIES ===== */
+.st-hero{background:var(--orange-500);color:#fff;padding:var(--s-10) 0 var(--s-8);position:relative;overflow:hidden}
+.st-hero::after{content:'';position:absolute;right:-120px;bottom:-120px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.08)}
+.st-hero::before{content:'';position:absolute;left:60%;top:-80px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.06)}
+.st-hero-inner{max-width:var(--max-w);margin:0 auto;padding:0 var(--s-6)}
+.st-hero h1{font-family:var(--font-display);font-weight:800;font-size:var(--t-42);line-height:1.1;letter-spacing:-0.01em;margin-bottom:var(--s-3);color:#fff}
+.st-hero p{color:var(--white-72);font-size:var(--t-18);max-width:600px}
+.story-row-wrap{max-width:var(--max-w);margin:var(--s-6) auto 0;padding:0 var(--s-6)}
+.story-row{display:flex;gap:var(--s-4);overflow-x:auto;padding:4px 0 var(--s-4)}
+.story-row::-webkit-scrollbar{height:4px}
+.story-row::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:2px}
+.story-circle{flex-shrink:0;text-align:center;cursor:pointer}
+.story-circle .ring{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange-500),var(--pink-500));padding:3px}
+.story-circle.viewed .ring{background:var(--surface-3)}
+.story-circle .ava{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;font-size:36px;border:3px solid #fff}
+.story-circle .nm{font-size:var(--t-12);font-weight:600;color:var(--fg-1);margin-top:var(--s-2)}
+.story-circle .rl{font-size:var(--t-12);color:var(--fg-3);margin-top:2px}
+.feat-section{max-width:var(--max-w);margin:0 auto;padding:0 var(--s-6) var(--s-12)}
+.feat{display:grid;grid-template-columns:1.4fr 1fr;background:#fff;border-radius:var(--r-24);box-shadow:var(--shadow-volume),0 0 0 1px var(--black-6);overflow:hidden;margin-bottom:var(--s-8)}
+.feat-video{position:relative;background:#000;min-height:460px;display:grid;place-items:center;cursor:pointer;overflow:hidden}
+.feat-video video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.feat-video .play{width:84px;height:84px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:30px;color:var(--orange-700);box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:5}
+.feat-video .dur{position:absolute;top:var(--s-4);right:var(--s-4);background:rgba(0,0,0,.5);color:#fff;padding:4px 12px;border-radius:var(--r-pill);font-size:var(--t-12);font-weight:700}
+.feat-info{padding:var(--s-8);display:flex;flex-direction:column;justify-content:center}
+.feat-info .tag-row{margin-bottom:var(--s-3)}
+.feat-info h2{font-family:var(--font-display);font-weight:800;font-size:var(--t-24);letter-spacing:-0.005em;line-height:1.2;margin-bottom:var(--s-3)}
+.feat-info .quote{font-family:var(--font-display);font-weight:500;font-size:var(--t-16);line-height:1.5;color:var(--fg-2);margin-bottom:var(--s-5);padding-left:var(--s-4);border-left:3px solid var(--orange-500)}
+.feat-info .author-row{display:flex;align-items:center;gap:var(--s-3);margin-bottom:var(--s-5)}
+.feat-info .author-row .ava-big{width:52px;height:52px;border-radius:50%;background:var(--orange-100);color:var(--orange-700);display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:var(--t-18)}
+.feat-info .author-row .a-name{font-weight:700;font-size:var(--t-14)}
+.feat-info .author-row .a-role{font-size:var(--t-12);color:var(--fg-3);margin-top:2px}
+.feat-stats{display:flex;gap:var(--s-6);padding-top:var(--s-4);border-top:1px solid var(--border-1)}
+.fs-cell .v{font-family:var(--font-display);font-weight:800;font-size:var(--t-20);color:var(--blue-500)}
+.fs-cell .l{font-size:var(--t-12);color:var(--fg-3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.reels-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--s-5)}
+.reels-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-3)}
+.reel{position:relative;border-radius:var(--r-16);overflow:hidden;aspect-ratio:9/16;cursor:pointer;transition:transform var(--dur) var(--easing);box-shadow:var(--shadow-volume);background:#000}
+.reel:hover{transform:translateY(-4px)}
+.reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel-bg-emoji{position:absolute;inset:0;display:grid;place-items:center;font-size:140px;opacity:0.22}
+.reel-grad{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85) 100%)}
+.reel .meta{position:absolute;left:12px;right:12px;bottom:12px;color:#fff}
+.reel .meta h4{font-family:var(--font-display);font-weight:700;font-size:var(--t-14);margin-bottom:4px;line-height:1.25}
+.reel .meta .auth{display:flex;align-items:center;gap:6px;font-size:var(--t-12);color:var(--white-87)}
+.reel .meta .auth .a{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.3);display:grid;place-items:center;font-size:var(--t-12);font-weight:700}
+.reel .dur{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);color:#fff;padding:3px 8px;border-radius:var(--r-pill);font-size:var(--t-12);font-weight:700}
+.reel .like{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.95);padding:3px 10px;border-radius:var(--r-pill);font-size:var(--t-12);font-weight:700;color:var(--fg-1)}
+.reel .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center;font-size:18px;color:var(--fg-1);opacity:0;transition:opacity var(--dur) var(--easing)}
+.reel:hover .play-btn{opacity:1}
+.bg-1{background:linear-gradient(135deg,var(--orange-500),var(--orange-700))}
+.bg-2{background:linear-gradient(135deg,var(--pink-500),var(--pink-700))}
+.bg-3{background:linear-gradient(135deg,var(--yellow-500),var(--orange-500))}
+.bg-4{background:linear-gradient(135deg,var(--blue-500),var(--blue-700))}
+.bg-5{background:linear-gradient(135deg,var(--neutral-600),var(--neutral-700))}
+.bg-6{background:linear-gradient(135deg,var(--violet-500),var(--violet-700))}
+.bg-7{background:linear-gradient(135deg,var(--green-500),var(--green-700))}
+.bg-8{background:linear-gradient(135deg,var(--lblue-500),var(--lblue-700))}
+.final-st-cta{background:linear-gradient(135deg,var(--orange-100),#fff);border-radius:var(--r-24);border:1px solid var(--orange-200);padding:var(--s-10);text-align:center;margin-top:var(--s-12)}
+.final-st-cta h2{font-family:var(--font-display);font-weight:800;font-size:var(--t-32);margin-bottom:var(--s-2);letter-spacing:-0.005em}
+.final-st-cta p{color:var(--fg-2);margin-bottom:var(--s-5);max-width:540px;margin-left:auto;margin-right:auto}
+.final-st-cta .ctas{display:inline-flex;gap:var(--s-2);flex-wrap:wrap;justify-content:center}
+.viewer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;place-items:center;padding:var(--s-6)}
+.viewer.open{display:grid}
+.viewer-frame{width:100%;max-width:380px;aspect-ratio:9/16;background:#000;border-radius:var(--r-20);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.viewer-frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.viewer-progress{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:3px;z-index:3}
+.viewer-progress .s{flex:1;height:3px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden}
+.viewer-progress .s.done{background:rgba(255,255,255,.85)}
+.viewer-progress .s.active::after{content:'';display:block;width:0%;height:100%;background:rgba(255,255,255,.95);animation:storyProgress var(--story-dur,15s) linear forwards}
+@keyframes storyProgress{from{width:0%}to{width:100%}}
+.viewer-top{padding:24px 16px 8px;display:flex;align-items:center;gap:10px;color:#fff;z-index:3}
+.viewer-top .a{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-weight:700;font-size:14px}
+.viewer-top .info{flex:1}
+.viewer-top .info .nm{font-weight:700;font-size:var(--t-13)}
+.viewer-top .info .rl{font-size:var(--t-12);color:var(--white-72)}
+.viewer-top .x{width:32px;height:32px;color:#fff;font-size:18px;cursor:pointer;background:none;border:0}
+.viewer-caption{margin-top:auto;padding:var(--s-4) var(--s-5) 80px;color:#fff;position:relative;z-index:3}
+.viewer-caption h3{font-family:var(--font-display);font-weight:800;font-size:var(--t-18);margin-bottom:var(--s-2)}
+.viewer-caption p{font-size:var(--t-13);color:var(--white-87);line-height:1.5}
+.viewer-actions{position:absolute;bottom:16px;left:16px;right:16px;display:flex;gap:8px;z-index:3}
+.viewer-actions input{flex:1;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);border-radius:var(--r-pill);padding:10px 16px;color:#fff;font-size:var(--t-13);outline:none}
+.viewer-actions input::placeholder{color:rgba(255,255,255,.7)}
+.viewer-actions .react{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:grid;place-items:center;font-size:18px;color:#fff;cursor:pointer;border:0}
+
 /* =========================================================================
    RESPONSIVE
    ========================================================================= */
@@ -1351,6 +1552,7 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
   .hero-inner { grid-template-columns: 1fr; gap: var(--s-6); }
   .hero h1 { font-size: 38px; }
   .hero-search { flex-direction: column; border-radius: var(--r-16); }
+  .hero-search .silpo-input { font-size: var(--t-14); }
   .hero-search .silpo-input.divider { box-shadow: 0 -1px 0 0 var(--border-1); max-width: 100%; }
   .cats-grid { grid-template-columns: repeat(2, 1fr); }
   .hot-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1364,8 +1566,10 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
   .header-right .user span { display: none; }
   .cat-layout { grid-template-columns: 1fr; }
   .filters { position: static; display: none; }
-  .filters.open { display: block; }
+  .filters.open { display: block; padding-bottom: 72px; }
   .filter-toggle { display: flex; }
+  .filter-apply-btn { display: none; }
+  .filter-apply-btn.visible { display: block; position: fixed; bottom: 72px; left: var(--s-4); right: var(--s-4); width: auto; padding: 16px; background: var(--blue-500); color: #fff; font-family: var(--font-text); font-size: var(--t-16); font-weight: 700; border: 0; border-radius: var(--r-pill); cursor: pointer; box-shadow: 0 -4px 24px rgba(35,88,209,.3); z-index: 200; }
   .results-grid { grid-template-columns: 1fr; }
   .cat-search-row { grid-template-columns: 1fr; }
   .detail-grid { grid-template-columns: 1fr; }
@@ -1373,6 +1577,17 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
   .detail-head h1 { font-size: var(--t-32); }
   .offers-grid { grid-template-columns: 1fr; }
   .similar-grid { grid-template-columns: 1fr; }
+  .calc-card { grid-template-columns: 1fr; }
+  .calc-inputs { padding: var(--s-5); border-right: 0; border-bottom: 1px solid var(--border-1); }
+  .calc-result { padding: var(--s-5); }
+  .role-grid, .city-grid { grid-template-columns: repeat(2, 1fr); }
+  .r-total { font-size: 48px; }
+  .extras-grid { grid-template-columns: 1fr; }
+  .calc-hero h1 { font-size: var(--t-32); }
+  .reels-grid { grid-template-columns: repeat(2, 1fr); }
+  .feat { grid-template-columns: 1fr; }
+  .feat-info { padding: var(--s-6); }
+  .st-hero h1 { font-size: var(--t-32); }
 }
 @media (max-width: 600px) {
   .footer-inner { grid-template-columns: 1fr; }
@@ -1382,7 +1597,7 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
   .benefits-grid { grid-template-columns: 1fr; }
   .steps { grid-template-columns: 1fr; }
   .mobile-nav { display: block; }
-  body { padding-bottom: 64px; }
+  body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
   .header-right, .header-search { display: none; }
   .hero h1 { font-size: 32px; }
   .hero-inner { padding: var(--s-8) var(--s-4) var(--s-12); }
@@ -1398,10 +1613,7 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 <header class="header">
   <div class="header-inner">
     <div class="logo" onclick="App.navigate('home')">
-      <span class="logo-tile">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 5.65-7 10-7 10z"/></svg>
-      </span>
-      <span>Сільпо</span>
+      <img class="logo-img" src="logo-silpo.png" alt="Сільпо" height="32">
       <span class="logo-suffix">/ Робота</span>
     </div>
     <div class="header-search search-wrap">
@@ -1430,6 +1642,8 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
     <a data-page="home" class="active">Головна</a>
     <a data-page="vacancies">Усі вакансії</a>
     <a data-page="courier">Кур'єри</a>
+    <a data-page="calculator">Калькулятор зп</a>
+    <a data-page="stories">Історії</a>
     <a data-page="about">Про компанію</a>
   </div>
 </nav>
@@ -1443,9 +1657,6 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
     <div id="modalContent"></div>
   </div>
 </div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
 
 <!-- MOBILE NAV -->
 <nav class="mobile-nav">
@@ -1565,6 +1776,8 @@ const App = {
       case 'vacancies': app.innerHTML = this.renderVacancies(); this.bindVacancies(); break;
       case 'detail': app.innerHTML = this.renderDetail(data); this.bindDetail(); break;
       case 'courier': app.innerHTML = this.renderCourier(); this.bindCourier(); break;
+      case 'calculator': app.innerHTML = this.renderCalculator(); this.bindCalculator(); break;
+      case 'stories': app.innerHTML = this.renderStories(); this.bindStories(); break;
       case 'about': app.innerHTML = this.renderAbout(); break;
     }
   },
@@ -1865,7 +2078,11 @@ const App = {
         <div>
           <span class="hero-eyebrow">🌿 Понад ${VACANCIES.length * 100}+ відкритих вакансій</span>
           <h1>Працюй у Сільпо — там, де про тебе дбають</h1>
-          <p class="lead">Стабільна зарплата, офіційне оформлення, гнучкий графік і команда, яка триматиметься поряд з першого дня.</p>
+          <p class="lead">Стабільна зарплата, офіційне оформлення, гнучкий графік і команда, яка триматиметься поряд з першого дня. Від касира до Frontend-розробника.</p>
+          <div class="hero-cta-row">
+            <button class="hero-cta-btn" onclick="App.openModal()">Хочу на роботу! <span class="hero-cta-arrow">→</span></button>
+            <span class="hero-cta-hint"><span class="green-dot"></span> HR відповість за 1 робочий день</span>
+          </div>
           <div class="hero-search">
             <label class="silpo-input search-wrap">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -2051,7 +2268,46 @@ const App = {
 
   bindHome() {
     const inp = document.getElementById('homeSearch');
-    if (inp) inp.addEventListener('keydown', e => { if (e.key==='Enter') this.homeSearch(); });
+    if (inp) {
+      inp.addEventListener('keydown', e => { if (e.key==='Enter') this.homeSearch(); });
+      this._startTypewriter(inp);
+    }
+  },
+
+  _twTimer: null,
+  _startTypewriter(inp) {
+    if (this._twTimer) clearTimeout(this._twTimer);
+    const words = ['Касир','Кур’єр','Збиральник','Кухар','Вантажник','Маркетолог','Комірник','Продавець','Піцайоло','Флорист','Пекар','Кондитер','Охоронець','Сушист','Водій','Frontend'];
+    let wi = 0, ci = 0, deleting = false;
+    const type = () => {
+      if (inp.value || document.activeElement === inp) {
+        this._twTimer = setTimeout(type, 800);
+        return;
+      }
+      const w = words[wi];
+      if (!deleting) {
+        ci++;
+        inp.placeholder = w.slice(0, ci);
+        if (ci >= w.length) {
+          deleting = true;
+          this._twTimer = setTimeout(type, 1800);
+          return;
+        }
+        this._twTimer = setTimeout(type, 100);
+      } else {
+        ci--;
+        inp.placeholder = w.slice(0, ci) || '​';
+        if (ci <= 0) {
+          deleting = false;
+          wi = (wi + 1) % words.length;
+          this._twTimer = setTimeout(type, 400);
+          return;
+        }
+        this._twTimer = setTimeout(type, 60);
+      }
+    };
+    inp.placeholder = '';
+    this._twTimer = setTimeout(type, 600);
   },
 
   homeSearch() {
@@ -2114,7 +2370,7 @@ const App = {
 
         <div class="quick-filters">
           ${[{key:'',label:'Всі'},{key:'Магазин',label:'🛒 Магазин'},{key:'Склад',label:'📦 Склад'},{key:"Кур'єр",label:"🛵 Кур'єри"},{key:'Офіс',label:'💻 Офіс'}].map(q=>
-            `<button class="chip${f.category===q.key?' on':''}" onclick="App.setQuickFilter('${q.key}')">${q.label}</button>`
+            `<button class="chip${f.category===q.key?' on':''}" onclick="App.setQuickFilter(&quot;${q.key}&quot;)">${q.label}</button>`
           ).join('')}
         </div>
 
@@ -2137,9 +2393,15 @@ const App = {
             </div>
             <div class="filter-group">
               <div class="fg-head">Зарплата, ₴</div>
-              <div class="filter-salary-row">
-                <label class="silpo-input"><input type="number" placeholder="від" id="salaryFrom" value="${f.salaryFrom||''}" onchange="App.setSalary()"></label>
-                <label class="silpo-input"><input type="number" placeholder="до" id="salaryTo" value="${f.salaryTo||''}" onchange="App.setSalary()"></label>
+              <div class="salary-slider-wrap">
+                <div class="salary-slider-vals"><span id="salMinVal">${(f.salaryFrom||10000).toLocaleString('uk')} ₴</span><span id="salMaxVal">${(f.salaryTo||70000).toLocaleString('uk')} ₴</span></div>
+                <div class="dual-range" id="salaryRange">
+                  <div class="track"></div>
+                  <div class="track-fill" id="salTrackFill"></div>
+                  <input type="range" min="10000" max="70000" step="1000" value="${f.salaryFrom||10000}" id="salaryFrom" oninput="App.updateSalarySlider()">
+                  <input type="range" min="10000" max="70000" step="1000" value="${f.salaryTo||70000}" id="salaryTo" oninput="App.updateSalarySlider()">
+                </div>
+                <div class="salary-slider-marks"><span>10 000</span><span>40 000</span><span>70 000</span></div>
               </div>
             </div>
             <div class="filter-group">
@@ -2156,6 +2418,7 @@ const App = {
               <div class="fg-head">Зайнятість</div>
               ${['Повна','Часткова','Гнучка'].map(e=>`<label class="filter-row"><input type="checkbox" value="${e}" ${f.employment.includes(e)?'checked':''} onchange="App.toggleFilter('employment','${e}')"> ${e}</label>`).join('')}
             </div>
+            <button class="filter-apply-btn" onclick="App.applyMobileFilters()">Застосувати</button>
           </aside>
 
           <div>
@@ -2185,7 +2448,17 @@ const App = {
     </div>`;
   },
 
-  bindVacancies() {},
+  bindVacancies() {
+    const fromEl = document.getElementById('salaryFrom');
+    const toEl = document.getElementById('salaryTo');
+    if (fromEl && toEl) {
+      const min = 10000, max = 70000, range = max - min;
+      const left = ((parseInt(fromEl.value) - min) / range) * 100;
+      const right = ((parseInt(toEl.value) - min) / range) * 100;
+      const fill = document.getElementById('salTrackFill');
+      if (fill) { fill.style.left = left + '%'; fill.style.width = (right - left) + '%'; }
+    }
+  },
 
   vacCitySearch() {
     const city = document.getElementById('vacCity')?.value?.trim() || '';
@@ -2196,9 +2469,27 @@ const App = {
     this.navigate('vacancies');
   },
 
+  _isMobileFiltersOpen() {
+    const el = document.getElementById('vacFilters');
+    return el && el.classList.contains('open') && window.innerWidth <= 900;
+  },
+
   toggleMobileFilters() {
     const el = document.getElementById('vacFilters');
-    if (el) el.classList.toggle('open');
+    const btn = document.querySelector('.filter-apply-btn');
+    if (el) {
+      el.classList.toggle('open');
+      if (btn) btn.classList.toggle('visible', el.classList.contains('open'));
+    }
+  },
+
+  applyMobileFilters() {
+    const el = document.getElementById('vacFilters');
+    const btn = document.querySelector('.filter-apply-btn');
+    if (el) el.classList.remove('open');
+    if (btn) btn.classList.remove('visible');
+    this.vacPage = 1;
+    this.navigate('vacancies');
   },
 
   toggleFilter(key, val) {
@@ -2206,7 +2497,7 @@ const App = {
     const idx = arr.indexOf(val);
     if (idx>=0) arr.splice(idx,1); else arr.push(val);
     this.vacPage = 1;
-    this.navigate('vacancies');
+    if (!this._isMobileFiltersOpen()) this.navigate('vacancies');
   },
 
   setQuickFilter(cat) {
@@ -2218,17 +2509,32 @@ const App = {
   toggleCategory(cat) {
     this.filters.category = this.filters.category===cat ? '' : cat;
     this.vacPage = 1;
-    this.navigate('vacancies');
+    if (!this._isMobileFiltersOpen()) this.navigate('vacancies');
   },
 
-  setSalary() {
-    const from = document.getElementById('salaryFrom')?.value;
-    const to = document.getElementById('salaryTo')?.value;
-    this.filters.salaryFrom = from ? parseInt(from) : null;
-    this.filters.salaryTo = to ? parseInt(to) : null;
+  updateSalarySlider() {
+    const fromEl = document.getElementById('salaryFrom');
+    const toEl = document.getElementById('salaryTo');
+    let fromVal = parseInt(fromEl.value);
+    let toVal = parseInt(toEl.value);
+    if (fromVal > toVal) { [fromVal, toVal] = [toVal, fromVal]; fromEl.value = fromVal; toEl.value = toVal; }
+    document.getElementById('salMinVal').textContent = fromVal.toLocaleString('uk') + ' ₴';
+    document.getElementById('salMaxVal').textContent = toVal.toLocaleString('uk') + ' ₴';
+    const min = 10000, max = 70000, range = max - min;
+    const left = ((fromVal - min) / range) * 100;
+    const right = ((toVal - min) / range) * 100;
+    const fill = document.getElementById('salTrackFill');
+    if (fill) { fill.style.left = left + '%'; fill.style.width = (right - left) + '%'; }
+    this.filters.salaryFrom = fromVal <= 10000 ? null : fromVal;
+    this.filters.salaryTo = toVal >= 70000 ? null : toVal;
     this.vacPage = 1;
-    this.navigate('vacancies');
+    if (!this._isMobileFiltersOpen()) {
+      clearTimeout(this._salaryDebounce);
+      this._salaryDebounce = setTimeout(() => { this.navigate('vacancies'); }, 300);
+    }
   },
+
+  setSalary() { this.updateSalarySlider(); },
 
   setSort(val) {
     this.filters.sort = val;
@@ -2429,6 +2735,444 @@ const App = {
     this.showToast('Заявку надіслано! HR зателефонує найближчим часом.','success');
   },
 
+  // ============ CALCULATOR ============
+  renderCalculator() {
+    return `<div class="page-view active fade-in">
+      <section class="calc-hero">
+        <div class="calc-hero-inner">
+          <h1>Скільки реально можна заробити в Сільпо?</h1>
+          <p>Обери посаду, графік і місто — покажемо чесний діапазон з бонусами, нічними, доплатами і реальним досвідом колег.</p>
+        </div>
+      </section>
+
+      <div class="calc-wrap">
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="calc-step">
+              <div class="lab"><span class="num">1</span> Посада</div>
+              <div class="role-grid">
+                <button class="role-pill" data-base="19000"><div class="ico tint-orange">💳</div><div><div class="nm">Касир</div><div class="bs">від 19 000 ₴</div></div></button>
+                <button class="role-pill on" data-base="22000"><div class="ico tint-orange">🛒</div><div><div class="nm">Продавець</div><div class="bs">від 20 000 ₴</div></div></button>
+                <button class="role-pill" data-base="22000"><div class="ico tint-yellow">🍕</div><div><div class="nm">Кухар</div><div class="bs">від 22 000 ₴</div></div></button>
+                <button class="role-pill" data-base="28000"><div class="ico tint-blue">🚛</div><div><div class="nm">Водій</div><div class="bs">від 28 000 ₴</div></div></button>
+                <button class="role-pill" data-base="21000"><div class="ico tint-blue">📦</div><div><div class="nm">Вантажник</div><div class="bs">від 21 000 ₴</div></div></button>
+                <button class="role-pill" data-base="32000"><div class="ico tint-pink">🛵</div><div><div class="nm">Кур'єр</div><div class="bs">від 32 000 ₴</div></div></button>
+              </div>
+            </div>
+
+            <div class="calc-step">
+              <div class="lab"><span class="num">2</span> Графік</div>
+              <div class="seg" id="calcSeg">
+                <button class="on" data-mult="1">5/2</button>
+                <button data-mult="1.1">2/2</button>
+                <button data-mult="0.65">Часткова</button>
+                <button data-mult="0.8">Гнучка</button>
+              </div>
+            </div>
+
+            <div class="calc-step">
+              <div class="lab"><span class="num">3</span> Годин на тиждень</div>
+              <div class="slider-row">
+                <div class="v" id="hoursVal">40<small>год/тиждень</small></div>
+                <div class="hint">~ 173 год/міс</div>
+              </div>
+              <input type="range" class="slider" min="20" max="60" value="40" step="2" id="hoursSlider">
+              <div class="slider-marks"><span>20 год</span><span>40 год</span><span>60 год</span></div>
+            </div>
+
+            <div class="calc-step">
+              <div class="lab"><span class="num">4</span> Доплати</div>
+              <div class="toggle-list">
+                <div class="toggle-row" data-amt="4800">
+                  <div class="info"><h5>🌙 Нічні зміни</h5><p>+40% до годинної ставки</p></div>
+                  <div class="amt">+ 4 800 ₴</div>
+                  <div class="switch"></div>
+                </div>
+                <div class="toggle-row on" data-amt="3300">
+                  <div class="info"><h5>🎯 Бонуси за KPI</h5><p>Премія за план до 15%</p></div>
+                  <div class="amt">+ 3 300 ₴</div>
+                  <div class="switch"></div>
+                </div>
+                <div class="toggle-row" data-amt="2200">
+                  <div class="info"><h5>🏥 Робота у вихідні</h5><p>Подвійна оплата святкових</p></div>
+                  <div class="amt">+ 2 200 ₴</div>
+                  <div class="switch"></div>
+                </div>
+                <div class="toggle-row" data-amt="1500">
+                  <div class="info"><h5>🧑‍🏫 Наставництво</h5><p>Доплата за навчання новеньких</p></div>
+                  <div class="amt">+ 1 500 ₴</div>
+                  <div class="switch"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="calc-step">
+              <div class="lab"><span class="num">5</span> Місто</div>
+              <div class="city-grid" id="calcCities">
+                <div class="city-pill on" data-mult="1.1">Київ<span class="mult">×1.10</span></div>
+                <div class="city-pill" data-mult="1.0">Харків<span class="mult">×1.00</span></div>
+                <div class="city-pill" data-mult="1.0">Одеса<span class="mult">×1.00</span></div>
+                <div class="city-pill" data-mult="0.95">Дніпро<span class="mult">×0.95</span></div>
+                <div class="city-pill" data-mult="0.95">Львів<span class="mult">×0.95</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-result">
+            <div class="r-label">Очікувана зарплата</div>
+            <div class="r-total"><span id="totalVal">25 300</span><span class="cur">₴/міс</span></div>
+            <div class="r-period">Реальний діапазон: <strong id="rangeVal">22 000 — 28 500 ₴</strong></div>
+
+            <div class="r-comp">
+              <div class="ico">↑</div>
+              <div>На <strong id="compPct">+12%</strong> вище ринку для цієї посади в <span id="compCity">Києві</span></div>
+            </div>
+
+            <div class="bk-bar">
+              <div class="bk-base" id="barBase" style="width:72%"></div>
+              <div class="bk-bonus" id="barBonus" style="width:13%"></div>
+              <div class="bk-city" id="barCity" style="width:8%"></div>
+              <div class="bk-extra" id="barExtra" style="width:7%"></div>
+            </div>
+            <div class="bk-list">
+              <div class="bk-row"><span class="dot bk-base"></span><span class="lb">Базова ставка</span><span class="amt" id="bkBaseAmt">18 200 ₴</span></div>
+              <div class="bk-row"><span class="dot bk-bonus"></span><span class="lb">Бонуси KPI</span><span class="amt" id="bkBonusAmt">3 300 ₴</span></div>
+              <div class="bk-row"><span class="dot bk-city"></span><span class="lb">Київський коефіцієнт</span><span class="amt" id="bkCityAmt">2 000 ₴</span></div>
+              <div class="bk-row"><span class="dot bk-extra"></span><span class="lb">Інші доплати</span><span class="amt" id="bkExtraAmt">1 800 ₴</span></div>
+            </div>
+
+            <div class="forecast">
+              <h4>Прогноз зростання</h4>
+              <div class="yg">
+                <div class="ycell"><div class="yv" id="fcNow">25,3 тис</div><div class="yl">Перший міс.</div></div>
+                <div class="ycell"><div class="yv" id="fc6m">28,9 тис</div><div class="yl">Через 6 міс.</div></div>
+                <div class="ycell"><div class="yv" id="fc1y">34,5 тис</div><div class="yl">Через рік</div></div>
+              </div>
+            </div>
+
+            <div class="r-ctas">
+              <button class="btn btn-stroked btn-lg" style="flex:0 0 auto" onclick="navigator.clipboard.writeText(window.location.href);Silpo.showToast('Посилання скопійовано','success')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+              <a class="btn btn-primary btn-lg" href="#vacancies" style="flex:1;text-align:center">Знайти таку вакансію →</a>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center;margin-top:var(--s-4);font-size:var(--t-12);color:var(--fg-3)">* Розрахунки на основі даних 24 000+ співробітників станом на травень 2026. Точна зарплата залежить від магазину і результатів.</p>
+      </div>
+
+      <section class="calc-extras">
+        <h2 class="section-title" style="font-size:var(--t-24)">Що ще впливає на дохід</h2>
+        <div class="extras-grid">
+          <div class="ec">
+            <div class="ico tint-pink">🎁</div>
+            <h4>20% знижка на товари</h4>
+            <p>Економія ≈ 1 500 ₴/міс при закупівлі в магазинах. Не зарплата, але реальні гроші.</p>
+          </div>
+          <div class="ec">
+            <div class="ico tint-lblue">🏥</div>
+            <h4>Медичне страхування</h4>
+            <p>Після 3 місяців. Покриває стоматологію, аналізи, прийоми. Економія ≈ 800 ₴/міс.</p>
+          </div>
+          <div class="ec">
+            <div class="ico tint-violet">📈</div>
+            <h4>Кар'єрне зростання</h4>
+            <p>За 12 місяців 38% касирів стають старшими продавцями (+25% до зп). Дані 2025.</p>
+          </div>
+        </div>
+      </section>
+    </div>`;
+  },
+
+  bindCalculator() {
+    let calcRole = 22000;
+    let calcSegMult = 1.0;
+    let calcCityMult = 1.1;
+    const fmt = (n) => Math.round(n).toLocaleString('uk-UA');
+    const fmtK = (n) => { const k = n / 1000; return (k % 1 === 0 ? k.toFixed(0) : k.toFixed(1).replace('.', ',')) + ' тис'; };
+
+    const recalc = () => {
+      const slider = document.getElementById('hoursSlider');
+      const hours = parseInt(slider.value);
+      document.getElementById('hoursVal').innerHTML = hours + '<small>год/тиждень</small>';
+
+      const base = calcRole * (hours / 40) * calcSegMult;
+      let bonus = 0;
+      document.querySelectorAll('.toggle-row.on').forEach(t => {
+        bonus += parseInt(t.dataset.amt) || 0;
+      });
+      const cityBonus = base * (calcCityMult - 1);
+      const total = Math.round((base + bonus + cityBonus) / 100) * 100;
+
+      document.getElementById('totalVal').textContent = fmt(total);
+
+      const lo = Math.round(total * 0.87 / 100) * 100;
+      const hi = Math.round(total * 1.13 / 100) * 100;
+      document.getElementById('rangeVal').textContent = fmt(lo) + ' — ' + fmt(hi) + ' ₴';
+
+      const pct = Math.round((total / (calcRole * 0.85) - 1) * 100);
+      document.getElementById('compPct').textContent = '+' + pct + '%';
+
+      const activeCity = document.querySelector('.city-pill.on');
+      const cityName = activeCity ? activeCity.textContent.split('×')[0].trim() : 'Києві';
+      const cityLocative = {'Київ':'Києві','Харків':'Харкові','Одеса':'Одесі','Дніпро':'Дніпрі','Львів':'Львові'}[cityName] || cityName;
+      document.getElementById('compCity').textContent = cityLocative;
+
+      const baseRound = Math.round(base);
+      const bonusRound = Math.round(bonus);
+      const cityRound = Math.round(cityBonus);
+      const extraRound = Math.max(0, total - baseRound - bonusRound - cityRound);
+      const t = total || 1;
+      document.getElementById('barBase').style.width = Math.round(baseRound / t * 100) + '%';
+      document.getElementById('barBonus').style.width = Math.round(bonusRound / t * 100) + '%';
+      document.getElementById('barCity').style.width = Math.round(cityRound / t * 100) + '%';
+      document.getElementById('barExtra').style.width = Math.round(extraRound / t * 100) + '%';
+
+      document.getElementById('bkBaseAmt').textContent = fmt(baseRound) + ' ₴';
+      document.getElementById('bkBonusAmt').textContent = fmt(bonusRound) + ' ₴';
+      document.getElementById('bkCityAmt').textContent = fmt(cityRound) + ' ₴';
+      document.getElementById('bkExtraAmt').textContent = fmt(extraRound) + ' ₴';
+
+      document.getElementById('fcNow').textContent = fmtK(total);
+      document.getElementById('fc6m').textContent = fmtK(total * 1.14);
+      document.getElementById('fc1y').textContent = fmtK(total * 1.36);
+    };
+
+    document.querySelectorAll('.role-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.role-pill').forEach(r => r.classList.remove('on'));
+        pill.classList.add('on');
+        calcRole = parseInt(pill.dataset.base);
+        recalc();
+      });
+    });
+
+    document.querySelectorAll('#calcSeg button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#calcSeg button').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        calcSegMult = parseFloat(btn.dataset.mult);
+        recalc();
+      });
+    });
+
+    document.getElementById('hoursSlider').addEventListener('input', recalc);
+
+    document.querySelectorAll('.toggle-row').forEach(row => {
+      row.addEventListener('click', () => {
+        row.classList.toggle('on');
+        recalc();
+      });
+    });
+
+    document.querySelectorAll('#calcCities .city-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#calcCities .city-pill').forEach(c => c.classList.remove('on'));
+        pill.classList.add('on');
+        calcCityMult = parseFloat(pill.dataset.mult);
+        recalc();
+      });
+    });
+
+    recalc();
+  },
+
+  // ============ STORIES ============
+  renderStories() {
+    return `<div class="page-view active fade-in">
+      <section class="st-hero">
+        <div class="st-hero-inner">
+          <h1>Без сценарію.<br>Реальні люди, реальні дні.</h1>
+          <p>Наші касири, кур’єри, кухарі та офісні працівники самі знімають короткі відео про свій робочий день. Без режисера, без шаблонів.</p>
+        </div>
+      </section>
+
+      <div class="story-row-wrap">
+        <div class="story-row">
+          <div class="story-circle" onclick="App.openViewer(0)"><div class="ring"><div class="ava tint-orange">\u{1F469}‍\u{1F4BC}</div></div><div class="nm">Оксана</div><div class="rl">Касир</div></div>
+          <div class="story-circle" onclick="App.openViewer(1)"><div class="ring"><div class="ava tint-pink">\u{1F6F5}</div></div><div class="nm">Артем</div><div class="rl">Кур’єр</div></div>
+          <div class="story-circle" onclick="App.openViewer(2)"><div class="ring"><div class="ava tint-yellow">\u{1F468}‍\u{1F373}</div></div><div class="nm">Дмитро</div><div class="rl">Кухар</div></div>
+          <div class="story-circle" onclick="App.openViewer(3)"><div class="ring"><div class="ava tint-pink">\u{1F490}</div></div><div class="nm">Наталія</div><div class="rl">Флорист</div></div>
+          <div class="story-circle" onclick="App.openViewer(4)"><div class="ring"><div class="ava tint-blue">\u{1F4E6}</div></div><div class="nm">Михайло</div><div class="rl">Вантажник</div></div>
+          <div class="story-circle" onclick="App.openViewer(5)"><div class="ring"><div class="ava tint-orange">\u{1F6D2}</div></div><div class="nm">Олена</div><div class="rl">Адмін</div></div>
+          <div class="story-circle" onclick="App.openViewer(6)"><div class="ring"><div class="ava tint-neutral">\u{1F6E1}️</div></div><div class="nm">Василь</div><div class="rl">Охоронець</div></div>
+          <div class="story-circle" onclick="App.openViewer(7)"><div class="ring"><div class="ava tint-green">\u{1F950}</div></div><div class="nm">Світлана</div><div class="rl">Пекар</div></div>
+        </div>
+      </div>
+
+      <section class="feat-section">
+        <div class="feat">
+          <div class="feat-video" onclick="App.openViewer(0)">
+            <video src="videos/story-1.mp4" muted loop playsinline preload="metadata"></video>
+            <div class="play">▶</div>
+          </div>
+          <div class="feat-info">
+            <div class="tag-row"><span class="tag tag-shop">Історія тижня · Магазин</span></div>
+            <h2>«За 4 роки виросла з касира до старшого продавця»</h2>
+            <p class="quote">Прийшла студенткою на касу, бо потрібні були гроші. Не думала, що тут залишусь. Зараз керую командою з 12 людей. У мене є чітке відчуття, що мене бачать.</p>
+            <div class="author-row">
+              <div class="ava-big">О</div>
+              <div>
+                <div class="a-name">Оксана Гриценко, 26</div>
+                <div class="a-role">Старший продавець · Сільпо Хрещатик · 4 роки</div>
+              </div>
+            </div>
+            <div class="feat-stats">
+              <div class="fs-cell"><div class="v">12,3K</div><div class="l">переглядів</div></div>
+              <div class="fs-cell"><div class="v">487</div><div class="l">вподобань</div></div>
+              <div class="fs-cell"><div class="v">34</div><div class="l">коментарів</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reels-filters" id="reelsFilters">
+          <button class="chip on">Усі</button>
+          <button class="chip">\u{1F6D2} Магазин</button>
+          <button class="chip">\u{1F6F5} Кур’єри</button>
+          <button class="chip">\u{1F4E6} Склад</button>
+          <button class="chip">\u{1F4BB} Офіс</button>
+          <button class="chip">\u{1F355} Кулінарія</button>
+          <button class="chip">\u{1F4C8} Кар’єра</button>
+          <button class="chip">\u{1F4B0} Про зарплату</button>
+        </div>
+
+        <div class="reels-grid">
+          <div class="reel" onclick="App.openViewer(0)"><video src="videos/story-1.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 2,1K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>«За 4 роки з касира до старшого продавця»</h4><div class="auth"><span class="a">О</span>Оксана · касир</div></div></div>
+          <div class="reel" onclick="App.openViewer(1)"><video src="videos/story-2.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 987</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>«Мій день на скутері. Чесно»</h4><div class="auth"><span class="a">А</span>Артем · кур’єр</div></div></div>
+          <div class="reel" onclick="App.openViewer(2)"><video src="videos/story-3.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 3,4K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Перша зміна піцайоло</h4><div class="auth"><span class="a">Д</span>Дмитро · кухар</div></div></div>
+          <div class="reel" onclick="App.openViewer(3)"><video src="videos/story-4.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 1,5K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Як зібрати букет за 90 секунд</h4><div class="auth"><span class="a">Н</span>Наталія · флорист</div></div></div>
+          <div class="reel" onclick="App.openViewer(4)"><video src="videos/story-5.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 642</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Нічна зміна на складі</h4><div class="auth"><span class="a">М</span>Михайло · вантажник</div></div></div>
+          <div class="reel" onclick="App.openViewer(5)"><video src="videos/story-6.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 1,1K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Робота в IT Сільпо</h4><div class="auth"><span class="a">А</span>Андрій · Frontend</div></div></div>
+          <div class="reel" onclick="App.openViewer(6)"><video src="videos/story-7.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 2,8K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>4:30 ранку. Печу хліб</h4><div class="auth"><span class="a">С</span>Світлана · пекар</div></div></div>
+          <div class="reel" onclick="App.openViewer(7)"><video src="videos/story-8.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 873</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>«Мені 52, мене взяли»</h4><div class="auth"><span class="a">В</span>Василь · охоронець</div></div></div>
+        </div>
+
+        <div style="text-align:center;margin-top:var(--s-8)">
+          <button class="btn btn-stroked btn-lg">Завантажити ще історій</button>
+        </div>
+
+        <div class="final-st-cta">
+          <h2>Подобається, як ми працюємо?</h2>
+          <p>Переглянь відкриті вакансії або залиш анкету — HR зателефонує протягом дня.</p>
+          <div class="ctas">
+            <a class="btn btn-primary btn-lg" href="#vacancies">Усі вакансії →</a>
+            <a class="btn btn-stroked btn-lg" href="#courier">Залишити анкету</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="viewer" id="storyViewer" onclick="if(event.target===this)App.closeViewer()">
+        <div class="viewer-frame">
+          <video id="viewerVideo" playsinline preload="metadata"></video>
+          <div class="viewer-progress" id="viewerProgress"></div>
+          <div class="viewer-top">
+            <div class="a" id="viewerAva">О</div>
+            <div class="info">
+              <div class="nm" id="viewerName">Оксана Гриценко</div>
+              <div class="rl" id="viewerRole">Старший продавець</div>
+            </div>
+            <button class="x" onclick="App.closeViewer()">✕</button>
+          </div>
+          <div class="viewer-caption">
+            <h3 id="viewerTitle"></h3>
+          </div>
+          <div class="viewer-actions">
+            <input placeholder="Написати повідомлення...">
+            <button class="react">♥</button>
+            <button class="react" onclick="App.nextStory()">↗</button>
+          </div>
+        </div>
+      </div>
+      ${this.renderFooter()}
+    </div>`;
+  },
+
+  _storyData: [
+    {src:'videos/story-1.mp4',name:'Оксана Гриценко',role:'Старший продавець',ava:'О',title:'За 4 роки з касира до старшого продавця'},
+    {src:'videos/story-2.mp4',name:'Артем Коваленко',role:"Кур'єр Silpo Go",ava:'А',title:'Мій день на скутері. Чесно'},
+    {src:'videos/story-3.mp4',name:'Дмитро Шевчук',role:'Кухар-піцайоло',ava:'Д',title:'Перша зміна піцайоло'},
+    {src:'videos/story-4.mp4',name:'Наталія Шевченко',role:'Флорист',ava:'Н',title:'Як зібрати букет за 90 секунд'},
+    {src:'videos/story-5.mp4',name:'Михайло Лисак',role:'Вантажник складу',ava:'М',title:'Нічна зміна на складі'},
+    {src:'videos/story-6.mp4',name:'Олена Ткаченко',role:'Адміністратор',ava:'О',title:'Робота в IT Сільпо'},
+    {src:'videos/story-7.mp4',name:'Світлана Бондар',role:'Пекар',ava:'С',title:'4:30 ранку. Печу хліб'},
+    {src:'videos/story-8.mp4',name:'Василь Кравець',role:'Охоронець',ava:'В',title:'Мені 52, мене взяли'},
+  ],
+  _currentStory: 0,
+
+  bindStories() {
+    document.querySelectorAll('#reelsFilters .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#reelsFilters .chip').forEach(c => c.classList.remove('on'));
+        chip.classList.add('on');
+      });
+    });
+    document.querySelectorAll('.story-circle').forEach(c => {
+      c.addEventListener('click', () => c.classList.add('viewed'));
+    });
+    // autoplay reel thumbnails on hover
+    document.querySelectorAll('.reel video, .feat-video video').forEach(v => {
+      const parent = v.closest('.reel') || v.closest('.feat-video');
+      if (parent) {
+        parent.addEventListener('mouseenter', () => { v.currentTime = 0; v.play().catch(()=>{}); });
+        parent.addEventListener('mouseleave', () => { v.pause(); });
+      }
+    });
+    // viewer: auto-advance when video ends
+    const vid = document.getElementById('viewerVideo');
+    if (vid) vid.addEventListener('ended', () => this.nextStory());
+  },
+
+  openViewer(idx) {
+    if (typeof idx !== 'number') idx = 0;
+    this._currentStory = idx;
+    const v = document.getElementById('storyViewer');
+    if (v) {
+      v.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      this._loadStory(idx);
+    }
+  },
+
+  _loadStory(idx) {
+    const stories = this._storyData;
+    if (idx < 0 || idx >= stories.length) { this.closeViewer(); return; }
+    this._currentStory = idx;
+    const s = stories[idx];
+    const vid = document.getElementById('viewerVideo');
+    vid.src = s.src;
+    vid.play().catch(()=>{});
+    document.getElementById('viewerAva').textContent = s.ava;
+    document.getElementById('viewerName').textContent = s.name;
+    document.getElementById('viewerRole').textContent = s.role;
+    document.getElementById('viewerTitle').textContent = s.title;
+    // progress dots — set duration from video metadata
+    const prog = document.getElementById('viewerProgress');
+    const buildProgress = () => {
+      const dur = vid.duration || 15;
+      prog.style.setProperty('--story-dur', dur + 's');
+      prog.innerHTML = stories.map((_,i) =>
+        '<div class="s' + (i < idx ? ' done' : i === idx ? ' active' : '') + '"></div>'
+      ).join('');
+    };
+    if (vid.readyState >= 1) buildProgress();
+    else vid.addEventListener('loadedmetadata', buildProgress, {once:true});
+    // mark circle as viewed
+    const circles = document.querySelectorAll('.story-circle');
+    if (circles[idx]) circles[idx].classList.add('viewed');
+  },
+
+  nextStory() {
+    this._loadStory(this._currentStory + 1);
+  },
+
+  closeViewer() {
+    const v = document.getElementById('storyViewer');
+    if (v) {
+      v.classList.remove('open');
+      const vid = document.getElementById('viewerVideo');
+      if (vid) { vid.pause(); vid.src = ''; }
+      document.body.style.overflow = '';
+    }
+  },
+
   // ============ ABOUT ============
   renderAbout() {
     return `<div class="page-view active fade-in">
@@ -2481,19 +3225,18 @@ const App = {
     const v = vacId ? VACANCIES.find(x=>x.id===vacId) : null;
     const vacTitle = v ? v.title : '';
     document.getElementById('modalContent').innerHTML = `
-      <div class="modal-header"><h3>Відгук на вакансію</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <div class="modal-header"><div class="modal-header-text"><span class="modal-label">ВІДГУК НА ВАКАНСІЮ</span><h3>${v ? v.title : 'Вакансія'}</h3></div><button class="modal-close" onclick="App.closeModal()">✕</button></div>
       <div class="modal-body" id="formView">
         ${v?`<div class="vac-badge-info">📋 ${v.title} — ${v.location}</div>`:''}
-        <div class="form-group" id="fg-name"><label>Ім'я *</label><input type="text" id="formName" placeholder="Ваше ім'я"><div class="error-msg">Введіть ім'я</div></div>
-        <div class="form-group" id="fg-phone"><label>Телефон *</label><input type="tel" id="formPhone" placeholder="+380 XX XXX XX XX"><div class="error-msg">Введіть номер телефону</div></div>
-        <div class="form-row">
-          <div class="form-group"><label>Де бажаєте працювати</label><select id="formPlace"><option value="">Оберіть</option><option>Магазин</option><option>Склад</option><option>Офіс</option><option>Кур'єр</option></select></div>
-          <div class="form-group" id="fg-city"><label>Місто *</label><select id="formCity"><option value="">Оберіть місто</option>${CITIES.map(c=>`<option ${v&&v.city===c?'selected':''}>${c}</option>`).join('')}</select><div class="error-msg">Оберіть місто</div></div>
-        </div>
-        <div class="form-group"><label>Бажана посада</label><input type="text" id="formPosition" placeholder="Наприклад, касир" value="${vacTitle}"></div>
-        <div class="form-group"><label>Коментар</label><textarea id="formComment" placeholder="Додаткова інформація"></textarea></div>
-        <div class="form-group"><label>Звідки дізналися</label><select id="formSource"><option value="">Оберіть</option><option>Сайт Сільпо</option><option>Work.ua / Rabota.ua</option><option>Соцмережі</option><option>Від знайомих</option><option>Оголошення у магазині</option><option>Інше</option></select></div>
-        <div class="form-check"><input type="checkbox" id="formConsent"><label for="formConsent">Згоден з <a href="#">правилами обробки персональних даних</a></label></div>
+        <div class="form-group" id="fg-name"><input class="silpo-input" type="text" id="formName" placeholder="Ім'я"><div class="error-msg">Введіть ім'я</div></div>
+        <div class="form-group" id="fg-phone"><div class="phone-input-wrap"><span class="phone-prefix">Номер телефону<br>+380</span><input class="silpo-input phone-field" type="tel" id="formPhone" placeholder=""></div><div class="error-msg">Введіть номер телефону</div></div>
+        <div class="form-group"><select class="silpo-input" id="formPlace"><option value="">Де бажаєте працювати</option><option>Магазин</option><option>Склад</option><option>Офіс</option><option>Кур'єр</option></select></div>
+        <div class="form-group" id="fg-city"><select class="silpo-input" id="formCity"><option value="">Місто</option>${CITIES.map(c=>`<option ${v&&v.city===c?'selected':''}>${c}</option>`).join('')}</select><div class="error-msg">Оберіть місто</div></div>
+        <div class="form-group"><input class="silpo-input" type="text" id="formPosition" placeholder="Бажана посада" value="${vacTitle}"></div>
+        <div class="form-group"><label class="resume-upload" id="resumeLabel"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg><span>Резюме (за наявності)</span><input type="file" id="formResume" accept=".pdf,.doc,.docx" style="display:none" onchange="App._onResumeChange(this)"></label></div>
+        <div class="form-group"><textarea class="silpo-input" id="formComment" placeholder="Додати коментар" rows="3"></textarea></div>
+        <div class="form-group"><select class="silpo-input" id="formSource"><option value="">Звідки дізналися про вакансію</option><option>Сайт Сільпо</option><option>Work.ua / Rabota.ua</option><option>Соцмережі</option><option>Від знайомих</option><option>Оголошення у магазині</option><option>Інше</option></select></div>
+        <div class="form-check"><input type="checkbox" id="formConsent"><label for="formConsent">Згоден з <a href="#">Правилами обробки персональних даних</a></label></div>
         <button class="btn-submit" onclick="App.submitForm()">Надіслати</button>
         <div class="form-hint">Зазвичай HR зв'язується протягом 1 робочого дня</div>
       </div>
@@ -2513,6 +3256,17 @@ const App = {
   closeModal() {
     document.getElementById('modalOverlay').classList.remove('open');
     document.body.style.overflow = '';
+  },
+
+  _onResumeChange(input) {
+    const label = document.getElementById('resumeLabel');
+    if (input.files.length) {
+      label.classList.add('has-file');
+      label.querySelector('span').textContent = input.files[0].name;
+    } else {
+      label.classList.remove('has-file');
+      label.querySelector('span').textContent = 'Резюме (за наявності)';
+    }
   },
 
   submitForm() {
@@ -2549,8 +3303,7 @@ const App = {
     return `<footer class="footer"><div class="footer-inner">
       <div class="footer-brand">
         <div class="logo" onclick="App.navigate('home')">
-          <span class="logo-tile"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 5.65-7 10-7 10z"/></svg></span>
-          <span>Сільпо</span>
+          <img class="logo-img" src="logo-silpo.png" alt="Сільпо" height="32">
           <span class="logo-suffix">/ Робота</span>
         </div>
         <p>Робота в одній з найбільших роздрібних мереж України. 2 400+ вакансій по всій країні, від магазину до офісу Fozzy Group.</p>
