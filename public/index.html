@@ -537,7 +537,7 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 .autosuggest-city .autosuggest-item .as-icon{font-size:14px;width:32px;height:32px;border-radius:50%}
 .autosuggest-city{min-width:260px;right:0}
 .search-wrap{position:relative;z-index:1}
-.search-wrap:focus-within{z-index:100}
+.search-wrap:focus-within,.search-wrap:has(.autosuggest.open){z-index:9999}
 
 /* =========================================================================
    HERO
@@ -546,7 +546,6 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
   background: var(--orange-500);
   color: #fff;
   position: relative;
-  overflow: hidden;
 }
 .hero::after {
   content: '';
@@ -613,7 +612,10 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
   border-radius: var(--r-pill);
   box-shadow: var(--shadow-volume);
   max-width: 580px;
+  position: relative; z-index: 50;
 }
+.hero-quicklinks { position: relative; z-index: 1; }
+.hero-stats { position: relative; z-index: 1; }
 .hero-search .silpo-input {
   background: transparent;
   flex: 1;
@@ -2277,7 +2279,7 @@ const App = {
   _twTimer: null,
   _startTypewriter(inp) {
     if (this._twTimer) clearTimeout(this._twTimer);
-    const words = ['Касир','Кур’єр','Збиральник','Кухар','Вантажник','Маркетолог','Комірник','Продавець','Піцайоло','Флорист','Пекар','Кондитер','Охоронець','Сушист','Водій','Frontend'];
+    const words = ['Касир',"Кур'єр",'Збиральник','Кухар','Вантажник','Маркетолог','Комірник','Продавець','Піцайоло','Флорист','Пекар','Кондитер','Охоронець','Сушист','Водій','Frontend'];
     let wi = 0, ci = 0, deleting = false;
     const type = () => {
       if (inp.value || document.activeElement === inp) {
@@ -2977,108 +2979,108 @@ const App = {
 
   // ============ STORIES ============
   renderStories() {
-    const stories = this._storyData;
-    const tints = [‘tint-orange’,’tint-pink’,’tint-yellow’,’tint-pink’,’tint-blue’,’tint-orange’,’tint-neutral’,’tint-green’];
-    const first = stories[0] || {};
+    var stories = this._storyData;
+    var tintArr = ['tint-orange','tint-pink','tint-yellow','tint-pink','tint-blue','tint-orange','tint-neutral','tint-green'];
+    var first = stories[0] || {};
 
-    const circlesHtml = stories.map((s, i) => {
-      const firstName = s.name.split(‘ ‘)[0];
-      const tint = tints[i % tints.length];
-      return `<div class="story-circle" onclick="App.openViewer(${i})"><div class="ring"><div class="ava ${tint}">${s.ava}</div></div><div class="nm">${firstName}</div><div class="rl">${s.role.split(‘ ‘)[0]}</div></div>`;
-    }).join(‘’);
+    var circlesHtml = stories.map(function(s, i) {
+      var firstName = s.name.split(' ')[0];
+      var tint = tintArr[i % tintArr.length];
+      return '<div class="story-circle" onclick="App.openViewer('+i+')"><div class="ring"><div class="ava '+tint+'">'+s.ava+'</div></div><div class="nm">'+firstName+'</div><div class="rl">'+s.role.split(' ')[0]+'</div></div>';
+    }).join('');
 
-    const reelsHtml = stories.map((s, i) => {
-      const firstName = s.name.split(‘ ‘)[0];
-      return `<div class="reel" onclick="App.openViewer(${i})"><video src="${s.src}" muted loop playsinline preload="metadata"></video><span class="like">♥</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>${s.title}</h4><div class="auth"><span class="a">${s.ava}</span>${firstName} · ${s.role}</div></div></div>`;
-    }).join(‘’);
+    var reelsHtml = stories.map(function(s, i) {
+      var firstName = s.name.split(' ')[0];
+      return '<div class="reel" onclick="App.openViewer('+i+')"><video src="'+s.src+'" muted loop playsinline preload="metadata"></video><span class="like">♥</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>'+s.title+'</h4><div class="auth"><span class="a">'+s.ava+'</span>'+firstName+' · '+s.role+'</div></div></div>';
+    }).join('');
 
-    return `<div class="page-view active fade-in">
-      <section class="st-hero">
-        <div class="st-hero-inner">
-          <h1>Без сценарію.<br>Реальні люди, реальні дні.</h1>
-          <p>Наші касири, кур’єри, кухарі та офісні працівники самі знімають короткі відео про свій робочий день. Без режисера, без шаблонів.</p>
-        </div>
-      </section>
+    return '<div class="page-view active fade-in">' +
+      '<section class="st-hero">' +
+        '<div class="st-hero-inner">' +
+          '<h1>Без сценарію.<br>Реальні люди, реальні дні.</h1>' +
+          '<p>Наші касири, кур\'єри, кухарі та офісні працівники самі знімають короткі відео про свій робочий день. Без режисера, без шаблонів.</p>' +
+        '</div>' +
+      '</section>' +
 
-      <div class="story-row-wrap">
-        <div class="story-row">
-          ${circlesHtml}
-        </div>
-      </div>
+      '<div class="story-row-wrap">' +
+        '<div class="story-row">' +
+          circlesHtml +
+        '</div>' +
+      '</div>' +
 
-      <section class="feat-section">
-        <div class="feat">
-          <div class="feat-video" onclick="App.openViewer(0)">
-            <video src="${first.src || ‘’}" muted loop playsinline preload="metadata"></video>
-            <div class="play">▶</div>
-          </div>
-          <div class="feat-info">
-            <div class="tag-row"><span class="tag tag-shop">Історія тижня</span></div>
-            <h2>«${first.title || ‘’}»</h2>
-            <p class="quote">Реальна історія від нашого працівника. Без сценаріїв, без фільтрів — тільки справжній робочий день.</p>
-            <div class="author-row">
-              <div class="ava-big">${first.ava || ‘’}</div>
-              <div>
-                <div class="a-name">${first.name || ‘’}</div>
-                <div class="a-role">${first.role || ‘’}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      '<section class="feat-section">' +
+        '<div class="feat">' +
+          '<div class="feat-video" onclick="App.openViewer(0)">' +
+            '<video src="'+(first.src||'')+'" muted loop playsinline preload="metadata"></video>' +
+            '<div class="play">▶</div>' +
+          '</div>' +
+          '<div class="feat-info">' +
+            '<div class="tag-row"><span class="tag tag-shop">Історія тижня</span></div>' +
+            '<h2>«'+(first.title||'')+'»</h2>' +
+            '<p class="quote">Реальна історія від нашого працівника. Без сценаріїв, без фільтрів — тільки справжній робочий день.</p>' +
+            '<div class="author-row">' +
+              '<div class="ava-big">'+(first.ava||'')+'</div>' +
+              '<div>' +
+                '<div class="a-name">'+(first.name||'')+'</div>' +
+                '<div class="a-role">'+(first.role||'')+'</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
 
-        <div class="reels-filters" id="reelsFilters">
-          <button class="chip on">Усі</button>
-          <button class="chip">\u{1F6D2} Магазин</button>
-          <button class="chip">\u{1F6F5} Кур’єри</button>
-          <button class="chip">\u{1F4E6} Склад</button>
-          <button class="chip">\u{1F4BB} Офіс</button>
-          <button class="chip">\u{1F355} Кулінарія</button>
-          <button class="chip">\u{1F4C8} Кар’єра</button>
-          <button class="chip">\u{1F4B0} Про зарплату</button>
-        </div>
+        '<div class="reels-filters" id="reelsFilters">' +
+          '<button class="chip on">Усі</button>' +
+          '<button class="chip">🛒 Магазин</button>' +
+          '<button class="chip">🛵 Кур\'єри</button>' +
+          '<button class="chip">📦 Склад</button>' +
+          '<button class="chip">💻 Офіс</button>' +
+          '<button class="chip">🍕 Кулінарія</button>' +
+          '<button class="chip">📈 Кар\'єра</button>' +
+          '<button class="chip">💰 Про зарплату</button>' +
+        '</div>' +
 
-        <div class="reels-grid">
-          ${reelsHtml}
-        </div>
+        '<div class="reels-grid">' +
+          reelsHtml +
+        '</div>' +
 
-        <div style="text-align:center;margin-top:var(--s-8)">
-          <button class="btn btn-stroked btn-lg">Завантажити ще історій</button>
-        </div>
+        '<div style="text-align:center;margin-top:var(--s-8)">' +
+          '<button class="btn btn-stroked btn-lg">Завантажити ще історій</button>' +
+        '</div>' +
 
-        <div class="final-st-cta">
-          <h2>Подобається, як ми працюємо?</h2>
-          <p>Переглянь відкриті вакансії або залиш анкету — HR зателефонує протягом дня.</p>
-          <div class="ctas">
-            <a class="btn btn-primary btn-lg" href="#vacancies">Усі вакансії →</a>
-            <a class="btn btn-stroked btn-lg" href="#courier">Залишити анкету</a>
-          </div>
-        </div>
-      </section>
+        '<div class="final-st-cta">' +
+          '<h2>Подобається, як ми працюємо?</h2>' +
+          '<p>Переглянь відкриті вакансії або залиш анкету — HR зателефонує протягом дня.</p>' +
+          '<div class="ctas">' +
+            '<a class="btn btn-primary btn-lg" href="#vacancies">Усі вакансії →</a>' +
+            '<a class="btn btn-stroked btn-lg" href="#courier">Залишити анкету</a>' +
+          '</div>' +
+        '</div>' +
+      '</section>' +
 
-      <div class="viewer" id="storyViewer" onclick="if(event.target===this)App.closeViewer()">
-        <div class="viewer-frame">
-          <video id="viewerVideo" playsinline preload="metadata"></video>
-          <div class="viewer-progress" id="viewerProgress"></div>
-          <div class="viewer-top">
-            <div class="a" id="viewerAva">О</div>
-            <div class="info">
-              <div class="nm" id="viewerName">Оксана Гриценко</div>
-              <div class="rl" id="viewerRole">Старший продавець</div>
-            </div>
-            <button class="x" onclick="App.closeViewer()">✕</button>
-          </div>
-          <div class="viewer-caption">
-            <h3 id="viewerTitle"></h3>
-          </div>
-          <div class="viewer-actions">
-            <input placeholder="Написати повідомлення...">
-            <button class="react">♥</button>
-            <button class="react" onclick="App.nextStory()">↗</button>
-          </div>
-        </div>
-      </div>
-      ${this.renderFooter()}
-    </div>`;
+      '<div class="viewer" id="storyViewer" onclick="if(event.target===this)App.closeViewer()">' +
+        '<div class="viewer-frame">' +
+          '<video id="viewerVideo" playsinline preload="metadata"></video>' +
+          '<div class="viewer-progress" id="viewerProgress"></div>' +
+          '<div class="viewer-top">' +
+            '<div class="a" id="viewerAva">О</div>' +
+            '<div class="info">' +
+              '<div class="nm" id="viewerName">Оксана Гриценко</div>' +
+              '<div class="rl" id="viewerRole">Старший продавець</div>' +
+            '</div>' +
+            '<button class="x" onclick="App.closeViewer()">✕</button>' +
+          '</div>' +
+          '<div class="viewer-caption">' +
+            '<h3 id="viewerTitle"></h3>' +
+          '</div>' +
+          '<div class="viewer-actions">' +
+            '<input placeholder="Написати повідомлення...">' +
+            '<button class="react">♥</button>' +
+            '<button class="react" onclick="App.nextStory()">↗</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      this.renderFooter() +
+    '</div>';
   },
 
   _storyData: [
