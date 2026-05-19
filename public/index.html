@@ -1669,8 +1669,8 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 </nav>
 
 <script>
-// ============ DATA ============
-const VACANCIES = [
+// ============ DATA (loaded from API) ============
+let VACANCIES = [
   {id:1,title:"Продавець-консультант",location:"Київ, м. Хрещатик",address:"вул. Хрещатик, 22",category:"Магазин",hot:true,employment:"Повна",experience:"none",salary:20000,schedule:"5/2",city:"Київ",tags:["Студентам","50+"],date:"2025-05-16",duties:["Консультування покупців щодо асортименту та акцій","Викладання та поповнення товарів на полицях","Контроль термінів придатності та якості продукції","Дотримання стандартів обслуговування Сільпо"],requirements:["Досвід не обов'язковий — навчимо всього з першого дня","Відповідальність і уважність до деталей","Доброзичливість у спілкуванні з покупцями"],offers:["Зарплата від 20 000 грн + щомісячні бонуси","Офіційне оформлення з першого дня","Безкоштовне навчання та наставник","Знижка 20% на товари Сільпо","Медичне страхування після 3 місяців"]},
   {id:2,title:"Касир",location:"Київ, м. Позняки",address:"вул. Ревуцького, 5",category:"Магазин",hot:true,employment:"Повна",experience:"none",salary:19000,schedule:"2/2",city:"Київ",tags:["Студентам","Людям з інвалідністю"],date:"2025-05-15",duties:["Обслуговування покупців на касі","Розрахунок готівкою та карткою","Сканування та зважування товарів","Видача та обмін чеків"],requirements:["Без досвіду — навчимо","Уважність і відповідальність","Базові навички роботи з технікою"],offers:["Зарплата від 19 000 грн","Офіційне оформлення","Навчання і наставник","Гнучкий графік 2/2"]},
   {id:3,title:"Піцайоло",location:"Харків, м. Наукова",address:"просп. Науки, 14",category:"Магазин",hot:true,employment:"Повна",experience:"1year",salary:22000,schedule:"5/2",city:"Харків",tags:[],date:"2025-05-14",duties:["Приготування піци за рецептурами Сільпо","Робота з тістом та начинками","Контроль якості готової продукції","Дотримання санітарних норм"],requirements:["Досвід роботи на кухні від 1 року","Знання технологій приготування піци","Відповідальність та охайність"],offers:["Зарплата від 22 000 грн","Офіційне оформлення","Харчування на зміні","Кар'єрне зростання до шеф-кухаря"]},
@@ -1697,8 +1697,8 @@ const VACANCIES = [
   {id:24,title:"Охоронець",location:"Харків, м. Героїв Праці",address:"просп. Героїв Харкова, 199",category:"Магазин",hot:false,employment:"Повна",experience:"none",salary:18000,schedule:"2/2",city:"Харків",tags:["50+"],date:"2025-04-26",duties:["Забезпечення порядку в магазині","Контроль входу/виходу","Робота з системою відеоспостереження","Попередження крадіжок"],requirements:["Без досвіду — навчимо","Відповідальність","Стресостійкість"],offers:["Зарплата від 18 000 грн","Графік 2/2","Офіційне оформлення","Форма"]},
 ];
 
-const CITIES = ["Київ","Харків","Одеса","Дніпро","Львів"];
-const ALL_CITIES = ["Київ","Харків","Одеса","Дніпро","Львів","Запоріжжя","Вінниця","Полтава","Чернігів","Черкаси","Суми","Хмельницький","Житомир","Рівне","Тернопіль","Івано-Франківськ","Ужгород","Луцьк","Кропивницький","Миколаїв","Херсон","Чернівці","Біла Церква","Кременчук","Маріуполь","Краматорськ","Бровари","Ірпінь","Буча"];
+let CITIES = ["Київ","Харків","Одеса","Дніпро","Львів"];
+let ALL_CITIES = ["Київ","Харків","Одеса","Дніпро","Львів","Запоріжжя","Вінниця","Полтава","Чернігів","Черкаси","Суми","Хмельницький","Житомир","Рівне","Тернопіль","Івано-Франківськ","Ужгород","Луцьк","Кропивницький","Миколаїв","Херсон","Чернівці","Біла Церква","Кременчук","Маріуполь","Краматорськ","Бровари","Ірпінь","Буча"];
 const CATEGORIES_MAP = {"Магазин":"Магазин","Склад":"Склад","Офіс":"Офіс","Кур'єр":"Кур'єр"};
 
 // ============ APP ============
@@ -1725,7 +1725,7 @@ const App = {
     });
     const hash = location.hash.replace('#','');
     if (hash.startsWith('detail/')) {
-      const id = parseInt(hash.split('/')[1], 10);
+      const id = hash.split('/')[1];
       this.navigate('detail', id);
     } else {
       const startPage = hash && ['home','vacancies','courier','about'].includes(hash) ? hash : 'home';
@@ -1857,7 +1857,7 @@ const App = {
     const catIcons = {'Магазин':'🏪','Склад':'📦','Офіс':'🏢','Кур\'єр':'🛵'};
     return results.map((v, i) => `
       <div class="autosuggest-item${i === this._suggestIdx ? ' selected' : ''}"
-        onmousedown="App.selectSuggest(${v.id},'${suggestId}')"
+        onmousedown="App.selectSuggest('${v.id}','${suggestId}')"
         onmouseenter="App._suggestIdx=${i};App.updateSuggestHighlight('${suggestId}')">
         <div class="as-icon">${catIcons[v.category]||'📋'}</div>
         <div class="as-info">
@@ -2050,7 +2050,7 @@ const App = {
     const badges = [v.schedule, expLabel, ...v.tags];
     const daysAgo = Math.round((Date.now()-new Date(v.date))/(1000*60*60*24));
     const dateStr = daysAgo===0?'Сьогодні':daysAgo===1?'Вчора':daysAgo+' дн. тому';
-    return `<div class="vacancy-card ${cls}" onclick="App.navigate('detail',${v.id})">
+    return `<div class="vacancy-card ${cls}" onclick="App.navigate('detail','${v.id}')">
       <div class="vc-head"><span class="tag ${catClass}">${v.category}</span>${hot}</div>
       <div class="vc-title">${v.title}</div>
       <div class="vc-location">📍 ${v.location}</div>
@@ -2567,9 +2567,9 @@ const App = {
 
   // ============ DETAIL ============
   renderDetail(id) {
-    const v = VACANCIES.find(x=>x.id===id);
+    const v = VACANCIES.find(x=>String(x.id)===String(id));
     if (!v) return '<div class="section"><h2>Вакансію не знайдено</h2></div>';
-    const similar = VACANCIES.filter(x=>x.category===v.category && x.id!==v.id).slice(0,3);
+    const similar = VACANCIES.filter(x=>x.category===v.category && String(x.id)!==String(v.id)).slice(0,3);
     const daysAgo = Math.round((Date.now()-new Date(v.date))/(1000*60*60*24));
     const catClass = v.category==='Склад'?'tag-warehouse':v.category==='Офіс'?'tag-office':v.category==='Кур\'єр'?'tag-courier':'tag-shop';
     const expLabel = v.experience==='none'?'Без досвіду':v.experience==='1year'?'Досвід від 1 р.':'Досвід від 3 р.';
@@ -2623,7 +2623,7 @@ const App = {
                 з бонусами до +20%
                 <span class="pct">Ринкова</span>
               </div>
-              <button class="btn btn-primary btn-lg" style="width:100%" onclick="App.openModal(${v.id})">Відгукнутись на вакансію</button>
+              <button class="btn btn-primary btn-lg" style="width:100%" onclick="App.openModal('${v.id}')">Відгукнутись на вакансію</button>
               <button class="btn btn-stroked btn-lg" style="width:100%;margin-top:var(--s-2)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 Зберегти
@@ -2977,6 +2977,21 @@ const App = {
 
   // ============ STORIES ============
   renderStories() {
+    const stories = this._storyData;
+    const tints = [‘tint-orange’,’tint-pink’,’tint-yellow’,’tint-pink’,’tint-blue’,’tint-orange’,’tint-neutral’,’tint-green’];
+    const first = stories[0] || {};
+
+    const circlesHtml = stories.map((s, i) => {
+      const firstName = s.name.split(‘ ‘)[0];
+      const tint = tints[i % tints.length];
+      return `<div class="story-circle" onclick="App.openViewer(${i})"><div class="ring"><div class="ava ${tint}">${s.ava}</div></div><div class="nm">${firstName}</div><div class="rl">${s.role.split(‘ ‘)[0]}</div></div>`;
+    }).join(‘’);
+
+    const reelsHtml = stories.map((s, i) => {
+      const firstName = s.name.split(‘ ‘)[0];
+      return `<div class="reel" onclick="App.openViewer(${i})"><video src="${s.src}" muted loop playsinline preload="metadata"></video><span class="like">♥</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>${s.title}</h4><div class="auth"><span class="a">${s.ava}</span>${firstName} · ${s.role}</div></div></div>`;
+    }).join(‘’);
+
     return `<div class="page-view active fade-in">
       <section class="st-hero">
         <div class="st-hero-inner">
@@ -2987,38 +3002,26 @@ const App = {
 
       <div class="story-row-wrap">
         <div class="story-row">
-          <div class="story-circle" onclick="App.openViewer(0)"><div class="ring"><div class="ava tint-orange">\u{1F469}‍\u{1F4BC}</div></div><div class="nm">Оксана</div><div class="rl">Касир</div></div>
-          <div class="story-circle" onclick="App.openViewer(1)"><div class="ring"><div class="ava tint-pink">\u{1F6F5}</div></div><div class="nm">Артем</div><div class="rl">Кур’єр</div></div>
-          <div class="story-circle" onclick="App.openViewer(2)"><div class="ring"><div class="ava tint-yellow">\u{1F468}‍\u{1F373}</div></div><div class="nm">Дмитро</div><div class="rl">Кухар</div></div>
-          <div class="story-circle" onclick="App.openViewer(3)"><div class="ring"><div class="ava tint-pink">\u{1F490}</div></div><div class="nm">Наталія</div><div class="rl">Флорист</div></div>
-          <div class="story-circle" onclick="App.openViewer(4)"><div class="ring"><div class="ava tint-blue">\u{1F4E6}</div></div><div class="nm">Михайло</div><div class="rl">Вантажник</div></div>
-          <div class="story-circle" onclick="App.openViewer(5)"><div class="ring"><div class="ava tint-orange">\u{1F6D2}</div></div><div class="nm">Олена</div><div class="rl">Адмін</div></div>
-          <div class="story-circle" onclick="App.openViewer(6)"><div class="ring"><div class="ava tint-neutral">\u{1F6E1}️</div></div><div class="nm">Василь</div><div class="rl">Охоронець</div></div>
-          <div class="story-circle" onclick="App.openViewer(7)"><div class="ring"><div class="ava tint-green">\u{1F950}</div></div><div class="nm">Світлана</div><div class="rl">Пекар</div></div>
+          ${circlesHtml}
         </div>
       </div>
 
       <section class="feat-section">
         <div class="feat">
           <div class="feat-video" onclick="App.openViewer(0)">
-            <video src="videos/story-1.mp4" muted loop playsinline preload="metadata"></video>
+            <video src="${first.src || ‘’}" muted loop playsinline preload="metadata"></video>
             <div class="play">▶</div>
           </div>
           <div class="feat-info">
-            <div class="tag-row"><span class="tag tag-shop">Історія тижня · Магазин</span></div>
-            <h2>«За 4 роки виросла з касира до старшого продавця»</h2>
-            <p class="quote">Прийшла студенткою на касу, бо потрібні були гроші. Не думала, що тут залишусь. Зараз керую командою з 12 людей. У мене є чітке відчуття, що мене бачать.</p>
+            <div class="tag-row"><span class="tag tag-shop">Історія тижня</span></div>
+            <h2>«${first.title || ‘’}»</h2>
+            <p class="quote">Реальна історія від нашого працівника. Без сценаріїв, без фільтрів — тільки справжній робочий день.</p>
             <div class="author-row">
-              <div class="ava-big">О</div>
+              <div class="ava-big">${first.ava || ‘’}</div>
               <div>
-                <div class="a-name">Оксана Гриценко, 26</div>
-                <div class="a-role">Старший продавець · Сільпо Хрещатик · 4 роки</div>
+                <div class="a-name">${first.name || ‘’}</div>
+                <div class="a-role">${first.role || ‘’}</div>
               </div>
-            </div>
-            <div class="feat-stats">
-              <div class="fs-cell"><div class="v">12,3K</div><div class="l">переглядів</div></div>
-              <div class="fs-cell"><div class="v">487</div><div class="l">вподобань</div></div>
-              <div class="fs-cell"><div class="v">34</div><div class="l">коментарів</div></div>
             </div>
           </div>
         </div>
@@ -3035,14 +3038,7 @@ const App = {
         </div>
 
         <div class="reels-grid">
-          <div class="reel" onclick="App.openViewer(0)"><video src="videos/story-1.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 2,1K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>«За 4 роки з касира до старшого продавця»</h4><div class="auth"><span class="a">О</span>Оксана · касир</div></div></div>
-          <div class="reel" onclick="App.openViewer(1)"><video src="videos/story-2.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 987</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>«Мій день на скутері. Чесно»</h4><div class="auth"><span class="a">А</span>Артем · кур’єр</div></div></div>
-          <div class="reel" onclick="App.openViewer(2)"><video src="videos/story-3.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 3,4K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Перша зміна піцайоло</h4><div class="auth"><span class="a">Д</span>Дмитро · кухар</div></div></div>
-          <div class="reel" onclick="App.openViewer(3)"><video src="videos/story-4.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 1,5K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Як зібрати букет за 90 секунд</h4><div class="auth"><span class="a">Н</span>Наталія · флорист</div></div></div>
-          <div class="reel" onclick="App.openViewer(4)"><video src="videos/story-5.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 642</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Нічна зміна на складі</h4><div class="auth"><span class="a">М</span>Михайло · вантажник</div></div></div>
-          <div class="reel" onclick="App.openViewer(5)"><video src="videos/story-6.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 1,1K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>Робота в IT Сільпо</h4><div class="auth"><span class="a">А</span>Андрій · Frontend</div></div></div>
-          <div class="reel" onclick="App.openViewer(6)"><video src="videos/story-7.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 2,8K</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>4:30 ранку. Печу хліб</h4><div class="auth"><span class="a">С</span>Світлана · пекар</div></div></div>
-          <div class="reel" onclick="App.openViewer(7)"><video src="videos/story-8.mp4" muted loop playsinline preload="metadata"></video><span class="like">♥ 873</span><div class="reel-grad"></div><div class="play-btn">▶</div><div class="meta"><h4>«Мені 52, мене взяли»</h4><div class="auth"><span class="a">В</span>Василь · охоронець</div></div></div>
+          ${reelsHtml}
         </div>
 
         <div style="text-align:center;margin-top:var(--s-8)">
@@ -3222,7 +3218,7 @@ const App = {
 
   // ============ MODAL ============
   openModal(vacId) {
-    const v = vacId ? VACANCIES.find(x=>x.id===vacId) : null;
+    const v = vacId ? VACANCIES.find(x=>String(x.id)===String(vacId)) : null;
     const vacTitle = v ? v.title : '';
     document.getElementById('modalContent').innerHTML = `
       <div class="modal-header"><div class="modal-header-text"><span class="modal-label">ВІДГУК НА ВАКАНСІЮ</span><h3>${v ? v.title : 'Вакансія'}</h3></div><button class="modal-close" onclick="App.closeModal()">✕</button></div>
@@ -3275,6 +3271,9 @@ const App = {
     const phone = document.getElementById('formPhone').value.trim();
     const city = document.getElementById('formCity').value;
     const consent = document.getElementById('formConsent').checked;
+    const position = document.getElementById('formPosition') ? document.getElementById('formPosition').value.trim() : '';
+    const workplace = document.getElementById('formWorkplace') ? document.getElementById('formWorkplace').value.trim() : '';
+    const resumeInput = document.getElementById('formResume');
 
     document.querySelectorAll('.form-group').forEach(g => g.classList.remove('has-error'));
 
@@ -3285,8 +3284,36 @@ const App = {
 
     if (!valid) return;
 
-    document.getElementById('formView').style.display = 'none';
-    document.getElementById('successView').style.display = 'block';
+    // Send to API
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('phone', '+380' + phone);
+    formData.append('city', city);
+    if (position) formData.append('position', position);
+    if (workplace) formData.append('workplace', workplace);
+    if (this._currentVacancy) {
+      formData.append('vacancyId', this._currentVacancy._id || '');
+      formData.append('vacancyTitle', this._currentVacancy.title || '');
+    }
+    if (resumeInput && resumeInput.files[0]) {
+      formData.append('resume', resumeInput.files[0]);
+    }
+
+    fetch('/api/applications', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          document.getElementById('formView').style.display = 'none';
+          document.getElementById('successView').style.display = 'block';
+        } else {
+          this.showToast(data.error || 'Помилка відправки', 'error');
+        }
+      })
+      .catch(() => {
+        // Fallback: show success anyway (for offline/static mode)
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+      });
   },
 
   // ============ TOAST ============
@@ -3326,8 +3353,31 @@ const App = {
   }
 };
 
-// INIT
-App.init();
+// INIT — load data from API, then initialize
+(async function loadAndInit() {
+  try {
+    const [vacRes, citiesRes, storiesRes] = await Promise.all([
+      fetch('/api/vacancies?limit=1000').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/cities').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/stories').then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
+    if (vacRes && vacRes.vacancies) {
+      VACANCIES = vacRes.vacancies.map(v => ({ ...v, id: v._id || v.legacyId || v.id }));
+    }
+    if (citiesRes) {
+      if (citiesRes.primary) CITIES = citiesRes.primary;
+      if (citiesRes.all) ALL_CITIES = citiesRes.all;
+    }
+    if (storiesRes && storiesRes.length) {
+      App._storyData = storiesRes.map(s => ({
+        src: s.src, name: s.name, role: s.role, ava: s.ava, title: s.title
+      }));
+    }
+  } catch (e) {
+    console.log('API not available, using hardcoded data');
+  }
+  App.init();
+})();
 </script>
 </body>
 </html>
