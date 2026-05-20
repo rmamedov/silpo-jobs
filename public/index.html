@@ -1722,18 +1722,16 @@ var FuzzySearch = {
   // RU → UA character map
   _ruToUa: {'ы':'и','э':'е','ъ':'ь','ё':'є','и':'і','Ы':'И','Э':'Е','Ъ':'Ь','Ё':'Є','И':'І','ь':'ь'},
 
-  _synonymMap: {},
+  _synonymPairs: [], // [{syn: 'курьєр', canon: "кур'єр"}, ...]
 
   loadSynonyms: function(data) {
-    this._synonymMap = {};
+    this._synonymPairs = [];
     if (!data || !data.length) return;
     for (var i = 0; i < data.length; i++) {
       var group = data[i];
       var canon = group.canonical.toLowerCase();
-      if (!this._synonymMap[canon]) this._synonymMap[canon] = [];
       for (var j = 0; j < group.synonyms.length; j++) {
-        var syn = group.synonyms[j].toLowerCase();
-        this._synonymMap[syn] = canon;
+        this._synonymPairs.push({ syn: group.synonyms[j].toLowerCase(), canon: canon });
       }
     }
   },
@@ -1780,12 +1778,15 @@ var FuzzySearch = {
     var doubleConverted = this.convertRuToUa(converted);
     if (doubleConverted !== converted) terms.push(doubleConverted);
 
-    // Check synonyms for all terms so far
+    // Check synonyms: prefix match — if any term is a prefix of a synonym, add its canonical
     var allTerms = terms.slice();
     for (var i = 0; i < allTerms.length; i++) {
-      var canon = this._synonymMap[allTerms[i]];
-      if (canon && typeof canon === 'string') {
-        if (terms.indexOf(canon) === -1) terms.push(canon);
+      var t = allTerms[i];
+      for (var j = 0; j < this._synonymPairs.length; j++) {
+        var pair = this._synonymPairs[j];
+        if (pair.syn.indexOf(t) === 0 || t.indexOf(pair.syn) === 0) {
+          if (terms.indexOf(pair.canon) === -1) terms.push(pair.canon);
+        }
       }
     }
 
