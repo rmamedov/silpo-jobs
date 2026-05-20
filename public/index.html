@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<base href="/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Сільпо — Вакансії</title>
@@ -1610,6 +1611,16 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 </style>
 </head>
 <body>
+<script>
+// 301-style redirect: hash URLs → clean URLs
+(function() {
+  var h = location.hash.replace('#', '');
+  if (h) {
+    var url = '/' + (h === 'home' ? '' : h);
+    location.replace(url);
+  }
+})();
+</script>
 
 <!-- HEADER -->
 <header class="header">
@@ -1704,6 +1715,138 @@ let ALL_CITIES = ["Київ","Харків","Одеса","Дніпро","Льв�
 const CATEGORIES_MAP = {"Магазин":"Магазин","Склад":"Склад","Офіс":"Офіс","Кур'єр":"Кур'єр"};
 
 // ============ APP ============
+// ============ FUZZY SEARCH ENGINE ============
+var FuzzySearch = {
+  // EN → UA keyboard layout map
+  _enToUa: {q:'й',w:'ц',e:'у',r:'к',t:'е',y:'н',u:'г',i:'ш',o:'щ',p:'з','[':'х',']':'ї',a:'ф',s:'і',d:'в',f:'а',g:'п',h:'р',j:'о',k:'л',l:'д',';':'ж',"'":'є',z:'я',x:'ч',c:'с',v:'м',b:'и',n:'т',m:'ь',',':'б','.':'ю','/':'.','`':'ё','~':'Ё'},
+  // RU → UA character map
+  _ruToUa: {'ы':'и','э':'е','ъ':'ь','ё':'є','и':'і','Ы':'И','Э':'Е','Ъ':'Ь','Ё':'Є','И':'І','ь':'ь'},
+
+  _synonymMap: {},
+
+  loadSynonyms: function(data) {
+    this._synonymMap = {};
+    if (!data || !data.length) return;
+    for (var i = 0; i < data.length; i++) {
+      var group = data[i];
+      var canon = group.canonical.toLowerCase();
+      if (!this._synonymMap[canon]) this._synonymMap[canon] = [];
+      for (var j = 0; j < group.synonyms.length; j++) {
+        var syn = group.synonyms[j].toLowerCase();
+        this._synonymMap[syn] = canon;
+      }
+    }
+  },
+
+  convertLayout: function(str) {
+    var result = '';
+    for (var i = 0; i < str.length; i++) {
+      var ch = str[i];
+      var lower = ch.toLowerCase();
+      var mapped = this._enToUa[lower];
+      if (mapped) {
+        result += (ch === lower) ? mapped : mapped.toUpperCase();
+      } else {
+        result += ch;
+      }
+    }
+    return result;
+  },
+
+  convertRuToUa: function(str) {
+    var result = '';
+    for (var i = 0; i < str.length; i++) {
+      var ch = str[i];
+      result += this._ruToUa[ch] || ch;
+    }
+    return result;
+  },
+
+  // Get all possible search terms from input
+  expandQuery: function(query) {
+    var q = query.toLowerCase().trim();
+    if (!q) return [];
+    var terms = [q];
+
+    // Try EN→UA layout conversion
+    var converted = this.convertLayout(q);
+    if (converted !== q) terms.push(converted);
+
+    // Try RU→UA conversion
+    var ruConverted = this.convertRuToUa(q);
+    if (ruConverted !== q) terms.push(ruConverted);
+
+    // Also convert the layout-converted version from RU→UA
+    var doubleConverted = this.convertRuToUa(converted);
+    if (doubleConverted !== converted) terms.push(doubleConverted);
+
+    // Check synonyms for all terms so far
+    var allTerms = terms.slice();
+    for (var i = 0; i < allTerms.length; i++) {
+      var canon = this._synonymMap[allTerms[i]];
+      if (canon && typeof canon === 'string') {
+        if (terms.indexOf(canon) === -1) terms.push(canon);
+      }
+    }
+
+    return terms;
+  },
+
+  // Levenshtein distance for fuzzy matching
+  _levenshtein: function(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    var matrix = [];
+    for (var i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (var j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (var i = 1; i <= b.length; i++) {
+      for (var j = 1; j <= a.length; j++) {
+        var cost = b[i - 1] === a[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return matrix[b.length][a.length];
+  },
+
+  // Check if vacancy matches query (with fuzzy logic)
+  matches: function(vacancy, query) {
+    var terms = this.expandQuery(query);
+    if (!terms.length) return false;
+
+    var title = vacancy.title.toLowerCase();
+    var location = vacancy.location.toLowerCase();
+    var category = vacancy.category.toLowerCase();
+    var target = title + ' ' + location + ' ' + category;
+
+    for (var i = 0; i < terms.length; i++) {
+      if (target.indexOf(terms[i]) >= 0) return true;
+    }
+
+    // Fuzzy: Levenshtein distance on title words
+    var queryTerms = terms;
+    var titleWords = title.replace(/['']/g, '').split(/[\s\-]+/);
+    for (var i = 0; i < queryTerms.length; i++) {
+      var qt = queryTerms[i].replace(/['']/g, '');
+      if (qt.length < 3) continue;
+      for (var j = 0; j < titleWords.length; j++) {
+        var tw = titleWords[j];
+        if (tw.length < 3) continue;
+        // Allow distance proportional to word length
+        var maxDist = qt.length <= 4 ? 1 : qt.length <= 7 ? 2 : 3;
+        if (this._levenshtein(qt, tw) <= maxDist) return true;
+        // Also check if query is a prefix-ish match
+        if (tw.indexOf(qt.substring(0, Math.min(qt.length, 4))) === 0) return true;
+      }
+    }
+
+    return false;
+  }
+};
+
 const App = {
   currentPage: 'home',
   filters: {cities:[],employment:[],experience:[],salaryFrom:null,salaryTo:null,schedule:[],search:'',category:'',sort:'relevance'},
@@ -1725,12 +1868,12 @@ const App = {
         this._skipPush = false;
       }
     });
-    const hash = location.hash.replace('#','');
-    if (hash.startsWith('detail/')) {
-      const id = hash.split('/')[1];
+    var path = location.pathname.replace(/^\//, '').replace(/\/$/, '');
+    if (path.startsWith('detail/')) {
+      var id = path.split('/')[1];
       this.navigate('detail', id);
     } else {
-      const startPage = hash && ['home','vacancies','courier','about'].includes(hash) ? hash : 'home';
+      var startPage = path && ['vacancies','courier','calculator','stories','about'].includes(path) ? path : 'home';
       this.navigate(startPage);
     }
     document.getElementById('modalOverlay').addEventListener('click', e => {
@@ -1753,15 +1896,15 @@ const App = {
 
   navigate(page, data) {
     if (!this._skipPush) {
-      const state = {
-        page,
+      var state = {
+        page: page,
         data: data || null,
         filters: JSON.parse(JSON.stringify(this.filters)),
         vacPage: this.vacPage,
         hotCity: this.hotCity
       };
-      const hash = '#' + page + (data ? '/' + data : '');
-      history.pushState(state, '', hash);
+      var url = '/' + (page === 'home' ? '' : page) + (data ? '/' + data : '');
+      history.pushState(state, '', url);
     }
     this.renderPage(page, data);
   },
@@ -1789,8 +1932,7 @@ const App = {
     let list = [...VACANCIES];
     const f = this.filters;
     if (f.search) {
-      const s = f.search.toLowerCase();
-      list = list.filter(v => v.title.toLowerCase().includes(s) || v.location.toLowerCase().includes(s) || v.category.toLowerCase().includes(s));
+      list = list.filter(function(v) { return FuzzySearch.matches(v, f.search); });
     }
     if (f.category) list = list.filter(v => v.category === f.category);
     if (f.cities.length) list = list.filter(v => f.cities.includes(v.city));
@@ -1824,31 +1966,49 @@ const App = {
   _suggestIdx: -1,
 
   buildSuggestResults(query) {
-    if (!query || query.length < 3) return [];
-    const q = query.toLowerCase();
-    const tokens = q.split(/\s+/).filter(t => t.length > 0);
-    const scored = VACANCIES.map(v => {
-      const title = v.title.toLowerCase();
-      let score = 0;
-      if (title.includes(q)) score += 100;
-      tokens.forEach(t => { if (title.includes(t)) score += 30; });
-      const words = title.split(/\s+/);
-      tokens.forEach(t => { words.forEach(w => { if (w.startsWith(t)) score += 20; }); });
-      return { vacancy: v, score };
-    }).filter(x => x.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 7);
-    return scored.map(x => x.vacancy);
+    if (!query || query.length < 1) return [];
+    var expandedTerms = FuzzySearch.expandQuery(query);
+    var scored = VACANCIES.map(function(v) {
+      var title = v.title.toLowerCase();
+      var score = 0;
+      for (var i = 0; i < expandedTerms.length; i++) {
+        var t = expandedTerms[i];
+        if (title.indexOf(t) >= 0) score += 100;
+        var titleWords = title.replace(/['']/g, '').split(/[\s\-]+/);
+        for (var j = 0; j < titleWords.length; j++) {
+          if (titleWords[j].indexOf(t.substring(0, Math.min(t.length, 4))) === 0) score += 40;
+        }
+      }
+      if (score === 0 && FuzzySearch.matches(v, query)) score = 10;
+      return { vacancy: v, score: score };
+    }).filter(function(x) { return x.score > 0; });
+    // Deduplicate by title
+    var seen = {};
+    var unique = [];
+    for (var i = 0; i < scored.length; i++) {
+      if (!seen[scored[i].vacancy.title]) {
+        seen[scored[i].vacancy.title] = true;
+        unique.push(scored[i]);
+      }
+    }
+    unique.sort(function(a, b) { return b.score - a.score; });
+    return unique.slice(0, 7).map(function(x) { return x.vacancy; });
   },
 
   highlightMatch(text, query) {
-    if (!query || query.length < 3) return text;
-    const tokens = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
-    let result = text;
-    tokens.forEach(t => {
-      const regex = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-      result = result.replace(regex, '<mark>$1</mark>');
-    });
+    if (!query || query.length < 1) return text;
+    var expanded = FuzzySearch.expandQuery(query);
+    var result = text;
+    for (var i = 0; i < expanded.length; i++) {
+      var t = expanded[i];
+      if (t.length < 1) continue;
+      var escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var regex = new RegExp('(' + escaped + ')', 'gi');
+      if (regex.test(result)) {
+        result = result.replace(regex, '<mark>$1</mark>');
+        break;
+      }
+    }
     return result;
   },
 
@@ -1876,7 +2036,7 @@ const App = {
     const el = document.getElementById(suggestId);
     if (!el) return;
     this._suggestIdx = -1;
-    if (q.length < 3) {
+    if (q.length < 1) {
       el.classList.remove('open');
       el.innerHTML = '';
       return;
@@ -2909,7 +3069,7 @@ const App = {
 
             <div class="r-ctas">
               <button class="btn btn-stroked btn-lg" style="flex:0 0 auto" onclick="navigator.clipboard.writeText(window.location.href);Silpo.showToast('Посилання скопійовано','success')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
-              <a class="btn btn-primary btn-lg" href="#vacancies" style="flex:1;text-align:center">Знайти таку вакансію →</a>
+              <a class="btn btn-primary btn-lg" href="/vacancies" onclick="event.preventDefault();App.navigate('vacancies')" style="flex:1;text-align:center">Знайти таку вакансію →</a>
             </div>
           </div>
         </div>
@@ -3106,8 +3266,8 @@ const App = {
           '<h2>Подобається, як ми працюємо?</h2>' +
           '<p>Переглянь відкриті вакансії або залиш анкету — HR зателефонує протягом дня.</p>' +
           '<div class="ctas">' +
-            '<a class="btn btn-primary btn-lg" href="#vacancies">Усі вакансії →</a>' +
-            '<a class="btn btn-stroked btn-lg" href="#courier">Залишити анкету</a>' +
+            '<a class="btn btn-primary btn-lg" href="/vacancies" onclick="event.preventDefault();App.navigate(\'vacancies\')">Усі вакансії →</a>' +
+            '<a class="btn btn-stroked btn-lg" href="/courier" onclick="event.preventDefault();App.navigate(\'courier\')">Залишити анкету</a>' +
           '</div>' +
         '</div>' +
       '</section>' +
@@ -3413,10 +3573,11 @@ const App = {
 // INIT — load data from API, then initialize
 (async function loadAndInit() {
   try {
-    const [vacRes, citiesRes, storiesRes] = await Promise.all([
+    const [vacRes, citiesRes, storiesRes, synonymsRes] = await Promise.all([
       fetch('/api/vacancies?limit=1000').then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/cities').then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/stories').then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch('/api/stories').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/synonyms').then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
     if (vacRes && vacRes.vacancies) {
       VACANCIES = vacRes.vacancies.map(v => ({ ...v, id: v._id || v.legacyId || v.id }));
@@ -3429,6 +3590,9 @@ const App = {
       App._storyData = storiesRes.map(s => ({
         src: s.src, name: s.name, role: s.role, ava: s.ava, title: s.title
       }));
+    }
+    if (synonymsRes) {
+      FuzzySearch.loadSynonyms(synonymsRes);
     }
   } catch (e) {
     console.log('API not available, using hardcoded data');

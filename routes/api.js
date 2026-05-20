@@ -5,6 +5,7 @@ const Vacancy = require('../models/Vacancy');
 const Application = require('../models/Application');
 const Story = require('../models/Story');
 const Settings = require('../models/Settings');
+const Synonym = require('../models/Synonym');
 
 const router = express.Router();
 
@@ -100,6 +101,16 @@ router.get('/settings', async (req, res) => {
       allCities: settings.allCities,
       categories: settings.categories
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/synonyms
+router.get('/synonyms', async (req, res) => {
+  try {
+    const synonyms = await Synonym.find().select('canonical synonyms -_id');
+    res.json(synonyms);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

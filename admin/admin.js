@@ -96,6 +96,9 @@ const AdminApp = {
           <a class="nav-item" data-page="stories" onclick="AdminApp.navigateTo('stories')">
             <span class="nav-icon">🎬</span> Історії
           </a>
+          <a class="nav-item" data-page="synonyms" onclick="AdminApp.navigateTo('synonyms')">
+            <span class="nav-icon">🔍</span> Синоніми пошуку
+          </a>
           <a class="nav-item" data-page="settings" onclick="AdminApp.navigateTo('settings')">
             <span class="nav-icon">⚙️</span> Налаштування
           </a>
@@ -124,7 +127,7 @@ const AdminApp = {
     this.currentPage = page;
     document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
     document.getElementById('sidebar').classList.remove('open');
-    const titles = { dashboard: 'Дашборд', vacancies: 'Вакансії', applications: 'Заявки', stories: 'Історії', settings: 'Налаштування' };
+    const titles = { dashboard: 'Дашборд', vacancies: 'Вакансії', applications: 'Заявки', stories: 'Історії', synonyms: 'Синоніми пошуку', settings: 'Налаштування' };
     document.getElementById('pageTitle').textContent = titles[page] || '';
     this['render_' + page]();
   },
@@ -694,6 +697,102 @@ const AdminApp = {
     await this.api(`/stories/${id}`, { method: 'DELETE' });
     this.toast('Історію видалено');
     this.render_stories();
+  },
+
+  // ══════════════════════════════════════════════
+  // SYNONYMS
+  // ══════════════════════════════════════════════
+  async render_synonyms() {
+    const el = document.getElementById('pageContent');
+    el.innerHTML = '<div class="loading">Завантаження...</div>';
+
+    const synonyms = await this.api('/synonyms');
+    if (!synonyms) { el.innerHTML = '<p>Помилка завантаження</p>'; return; }
+
+    el.innerHTML = `
+      <div class="section-header">
+        <p class="section-desc">Групи синонімів для нечіткого пошуку. Кожна група має канонічну назву (назва вакансії) та список синонімів — помилок, розкладок, жаргону.</p>
+        <button class="btn btn-primary" onclick="AdminApp.openSynonymForm()">+ Додати групу</button>
+      </div>
+      <div class="synonyms-grid">
+        ${synonyms.map(s => `
+          <div class="synonym-card">
+            <div class="synonym-card-header">
+              <h3>${s.canonical}</h3>
+              <div class="synonym-card-actions">
+                <button class="btn btn-sm btn-ghost" onclick="AdminApp.openSynonymForm('${s._id}')">✏️</button>
+                <button class="btn btn-sm btn-ghost btn-danger" onclick="AdminApp.deleteSynonym('${s._id}')">🗑️</button>
+              </div>
+            </div>
+            <div class="synonym-tags">
+              ${s.synonyms.map(syn => '<span class="synonym-tag">' + syn.replace(/</g, '&lt;') + '</span>').join('')}
+            </div>
+            <div class="synonym-count">${s.synonyms.length} синонімів</div>
+          </div>
+        `).join('')}
+      </div>`;
+  },
+
+  _synonymEditId: null,
+
+  async openSynonymForm(id) {
+    this._synonymEditId = id || null;
+    let data = { canonical: '', synonyms: [] };
+    if (id) {
+      const synonyms = await this.api('/synonyms');
+      data = synonyms.find(s => s._id === id) || data;
+    }
+
+    const escapedCanonical = (data.canonical || '').replace(/"/g, '&quot;');
+    document.getElementById('modal').innerHTML = `
+      <div class="modal-header">
+        <h2>${id ? 'Редагувати' : 'Нова'} група синонімів</h2>
+        <button class="modal-close" onclick="AdminApp.closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Канонічна назва (назва вакансії)</label>
+          <input type="text" id="synCanonical" value="${escapedCanonical}" placeholder="Кур'єр">
+        </div>
+        <div class="form-group">
+          <label>Синоніми (по одному на рядок)</label>
+          <textarea id="synList" rows="12" placeholder="курьєр&#10;курєр&#10;курер&#10;доставщик&#10;rehm'h">${data.synonyms.join('\n')}</textarea>
+          <small class="form-hint">Помилки, варіанти написання, англійська розкладка, жаргон, скорочення</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="AdminApp.closeModal()">Скасувати</button>
+        <button class="btn btn-primary" onclick="AdminApp.saveSynonym()">Зберегти</button>
+      </div>`;
+    document.getElementById('modalOverlay').classList.add('open');
+    document.getElementById('modal').classList.add('open');
+  },
+
+  async saveSynonym() {
+    const id = this._synonymEditId;
+    const canonical = document.getElementById('synCanonical').value.trim();
+    const rawList = document.getElementById('synList').value;
+    const synonyms = rawList.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+
+    if (!canonical) { this.toast('Вкажіть канонічну назву', 'error'); return; }
+
+    const url = id ? '/synonyms/' + id : '/synonyms';
+    const opts = { method: id ? 'PUT' : 'POST', body: JSON.stringify({ canonical, synonyms }) };
+    const res = await this.api(url, opts);
+    if (res) {
+      this.closeModal();
+      this.toast(id ? 'Оновлено' : 'Створено');
+      this.render_synonyms();
+    }
+  },
+
+  async deleteSynonym(id) {
+    if (!confirm('Видалити цю групу синонімів?')) return;
+    const res = await this.api('/synonyms/' + id, { method: 'DELETE' });
+    if (res) {
+      this.toast('Видалено');
+      this.render_synonyms();
+    }
   },
 
   // ══════════════════════════════════════════════

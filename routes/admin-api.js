@@ -6,6 +6,7 @@ const Vacancy = require('../models/Vacancy');
 const Application = require('../models/Application');
 const Story = require('../models/Story');
 const Settings = require('../models/Settings');
+const Synonym = require('../models/Synonym');
 
 const router = express.Router();
 
@@ -241,6 +242,47 @@ router.put('/settings', async (req, res) => {
     res.json(settings);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// ─── Synonyms CRUD ───
+router.get('/synonyms', async (req, res) => {
+  try {
+    const synonyms = await Synonym.find().sort({ canonical: 1 });
+    res.json(synonyms);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/synonyms', async (req, res) => {
+  try {
+    const { canonical, synonyms } = req.body;
+    if (!canonical) return res.status(400).json({ error: 'Canonical required' });
+    const doc = await Synonym.create({ canonical: canonical.trim(), synonyms: synonyms || [] });
+    res.status(201).json(doc);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.put('/synonyms/:id', async (req, res) => {
+  try {
+    const { canonical, synonyms } = req.body;
+    const doc = await Synonym.findByIdAndUpdate(req.params.id, { canonical: canonical.trim(), synonyms }, { new: true });
+    if (!doc) return res.status(404).json({ error: 'Not found' });
+    res.json(doc);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.delete('/synonyms/:id', async (req, res) => {
+  try {
+    await Synonym.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

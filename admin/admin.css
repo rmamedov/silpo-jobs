@@ -297,3 +297,17 @@ td.actions { white-space: nowrap; }
   .toolbar-filters { flex-direction: column; }
   .input-sm { min-width: auto; width: 100%; }
 }
+
+/* Synonyms */
+.synonyms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; margin-top: 16px; }
+.synonym-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.synonym-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.synonym-card-header h3 { margin: 0; font-size: 18px; color: var(--fg); }
+.synonym-card-actions { display: flex; gap: 4px; }
+.synonym-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.synonym-tag { display: inline-block; padding: 3px 10px; background: #f0f4ff; color: #2358D1; border-radius: 20px; font-size: 13px; font-weight: 500; }
+.synonym-count { font-size: 13px; color: var(--fg-muted); }
+.section-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 8px; }
+.section-desc { color: var(--fg-muted); font-size: 14px; max-width: 600px; margin: 0; }
+.form-hint { color: var(--fg-muted); font-size: 12px; margin-top: 4px; display: block; }
+.modal-body textarea { width: 100%; font-family: monospace; font-size: 13px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; resize: vertical; }
