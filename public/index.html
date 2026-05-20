@@ -534,6 +534,13 @@ textarea.silpo-input { min-height: 96px; resize: vertical; line-height: 1.4; }
 .autosuggest-item .as-meta{font-size:var(--t-12);color:var(--fg-3);display:flex;gap:var(--s-2);margin-top:2px}
 .autosuggest-item .as-salary{font-size:var(--t-13);font-weight:700;color:var(--blue-500);white-space:nowrap;flex-shrink:0}
 .autosuggest-hint{padding:var(--s-3) var(--s-4);font-size:var(--t-12);color:var(--fg-3);text-align:center}
+.as-filter-group{padding:var(--s-1) 0}
+.as-filter-item{background:var(--blue-50)}
+.as-filter-item:hover,.as-filter-item.selected{background:var(--blue-100)}
+.as-filter-item .as-icon{background:var(--blue-100);color:var(--blue-600)}
+.as-filter-label{color:var(--blue-600) !important}
+.as-arrow{font-size:var(--t-14);color:var(--blue-400);flex-shrink:0;font-weight:600}
+.as-divider{height:1px;background:var(--border-2);margin:var(--s-1) var(--s-4)}
 .autosuggest-item .as-count{font-size:var(--t-12);color:var(--fg-3);white-space:nowrap;flex-shrink:0}
 .autosuggest-city .autosuggest-item .as-icon{font-size:14px;width:32px;height:32px;border-radius:50%}
 .autosuggest-city{min-width:260px;right:0}
@@ -1966,6 +1973,63 @@ const App = {
   // ============ AUTOSUGGEST ============
   _suggestIdx: -1,
 
+  // ---- Filter suggestions data ----
+  _filterSuggestions: [
+    // Categories
+    {keywords:['магазин','магаз','shop','store','vfufp'],label:'Робота в Магазині',filter:{category:'Магазин'},icon:'🏪'},
+    {keywords:['склад','складс','warehouse','склады','crfkl'],label:'Робота на Складі',filter:{category:'Склад'},icon:'📦'},
+    {keywords:['офіс','офис','office','офісн','jais'],label:'Робота в Офісі',filter:{category:'Офіс'},icon:'🏢'},
+    {keywords:["кур'єр",'курєр','курьер','courier','delivery','доставк','доставщ','rehm'],label:'Робота Кур\'єром',filter:{category:"Кур'єр"},icon:'🛵'},
+    // Experience
+    {keywords:['без досвід','без опит','без стаж','no experience','новачок','новачк','без досв'],label:'Робота без досвіду',filter:{experience:'none'},icon:'🌱'},
+    {keywords:['від 1 рок','от 1 год','1 рік','досвід 1','1 year','з досвід'],label:'Робота з досвідом від 1 року',filter:{experience:'1year'},icon:'⭐'},
+    {keywords:['від 3 рок','от 3 год','3 рок','досвід 3','3 year'],label:'Робота з досвідом від 3 років',filter:{experience:'3years'},icon:'🏆'},
+    // Employment
+    {keywords:['частков','неповн','part time','часткова зайнят','підробіт','підроб'],label:'Часткова зайнятість',filter:{employment:'Часткова'},icon:'⏰'},
+    {keywords:['повна зайн','full time','повна','повний день','повний робоч'],label:'Повна зайнятість',filter:{employment:'Повна'},icon:'💼'},
+    {keywords:['гнучк','гнучкий графік','flexible','вільний графік'],label:'Гнучкий графік',filter:{employment:'Гнучка'},icon:'🔄'},
+    // Schedule
+    {keywords:['нічн','ночн','night shift','нічні змін'],label:'Нічні зміни',filter:{schedule:'Нічні зміни'},icon:'🌙'},
+    {keywords:['2/2','два через два','графік 2'],label:'Графік 2/2',filter:{schedule:'2/2'},icon:'📅'},
+    {keywords:['5/2','пʼятиден','п\'ятиден','пятиден','графік 5'],label:'Графік 5/2',filter:{schedule:'5/2'},icon:'📅'},
+    // Tags
+    {keywords:['студент','для студент','учн'],label:'Робота для студентів',filter:{tag:'Студентам'},icon:'🎓'},
+    {keywords:['50+','пенсіон','літн','для людей'],label:'Робота для 50+',filter:{tag:'50+'},icon:'👴'},
+  ],
+
+  buildFilterSuggestions(query) {
+    if (!query || query.length < 2) return [];
+    var q = query.toLowerCase().trim();
+    var results = [];
+    for (var i = 0; i < this._filterSuggestions.length; i++) {
+      var fs = this._filterSuggestions[i];
+      for (var k = 0; k < fs.keywords.length; k++) {
+        if (fs.keywords[k].indexOf(q) === 0 || q.indexOf(fs.keywords[k]) === 0) {
+          results.push(fs);
+          break;
+        }
+      }
+    }
+    return results.slice(0, 3);
+  },
+
+  selectFilterSuggest(idx, suggestId) {
+    this.closeSuggest(suggestId);
+    var fs = this._currentFilterSuggests[idx];
+    if (!fs) return;
+    // Reset all filters first
+    this.filters = {cities:[],employment:[],experience:[],salaryFrom:null,salaryTo:null,schedule:[],search:'',category:'',sort:'relevance'};
+    if (fs.filter.category) this.filters.category = fs.filter.category;
+    if (fs.filter.experience) this.filters.experience = [fs.filter.experience];
+    if (fs.filter.employment) this.filters.employment = [fs.filter.employment];
+    if (fs.filter.schedule) this.filters.schedule = [fs.filter.schedule];
+    if (fs.filter.tag) this.filters.search = fs.filter.tag;
+    this.vacPage = 1;
+    this.navigate('vacancies');
+  },
+
+  _currentFilterSuggests: [],
+
   buildSuggestResults(query) {
     if (!query || query.length < 1) return [];
     var expandedTerms = FuzzySearch.expandQuery(query);
@@ -1983,17 +2047,38 @@ const App = {
       if (score === 0 && FuzzySearch.matches(v, query)) score = 10;
       return { vacancy: v, score: score };
     }).filter(function(x) { return x.score > 0; });
-    // Deduplicate by title
-    var seen = {};
-    var unique = [];
-    for (var i = 0; i < scored.length; i++) {
-      if (!seen[scored[i].vacancy.title]) {
-        seen[scored[i].vacancy.title] = true;
-        unique.push(scored[i]);
+    // Sort by score desc
+    scored.sort(function(a, b) { return b.score - a.score; });
+    // Pick up to 4 vacancies with different cities
+    var result = [];
+    var seenCities = {};
+    var seenTitles = {};
+    // First pass: prefer unique title+city combos
+    for (var i = 0; i < scored.length && result.length < 4; i++) {
+      var v = scored[i].vacancy;
+      var key = v.title + '|' + v.city;
+      if (!seenTitles[v.title] || !seenCities[v.city]) {
+        if (!seenTitles[key]) {
+          seenTitles[key] = true;
+          seenTitles[v.title] = true;
+          seenCities[v.city] = true;
+          result.push(v);
+        }
       }
     }
-    unique.sort(function(a, b) { return b.score - a.score; });
-    return unique.slice(0, 7).map(function(x) { return x.vacancy; });
+    // If less than 4, fill with remaining unique vacancies
+    if (result.length < 4) {
+      var addedIds = {};
+      for (var i = 0; i < result.length; i++) addedIds[result[i].id] = true;
+      for (var i = 0; i < scored.length && result.length < 4; i++) {
+        var v = scored[i].vacancy;
+        if (!addedIds[v.id]) {
+          addedIds[v.id] = true;
+          result.push(v);
+        }
+      }
+    }
+    return result;
   },
 
   highlightMatch(text, query) {
@@ -2013,23 +2098,46 @@ const App = {
     return result;
   },
 
-  renderSuggest(results, query, suggestId) {
-    if (!results.length) {
+  renderSuggest(results, query, suggestId, filterSuggests) {
+    var html = '';
+    var idx = 0;
+    // Filter suggestions first
+    if (filterSuggests && filterSuggests.length) {
+      html += '<div class="as-filter-group">';
+      for (var f = 0; f < filterSuggests.length; f++) {
+        var fs = filterSuggests[f];
+        var currentIdx = idx;
+        html += '<div class="autosuggest-item as-filter-item' + (currentIdx === this._suggestIdx ? ' selected' : '') + '"' +
+          ' onmousedown="App.selectFilterSuggest(' + f + ',\'' + suggestId + '\')"' +
+          ' onmouseenter="App._suggestIdx=' + currentIdx + ';App.updateSuggestHighlight(\'' + suggestId + '\')">' +
+          '<div class="as-icon">' + fs.icon + '</div>' +
+          '<div class="as-info"><div class="as-title as-filter-label">' + fs.label + '</div></div>' +
+          '<div class="as-arrow">→</div></div>';
+        idx++;
+      }
+      html += '</div>';
+      if (results.length) html += '<div class="as-divider"></div>';
+    }
+    // Vacancy results
+    if (!results.length && !filterSuggests.length) {
       return '<div class="autosuggest-hint">Нічого не знайдено</div>';
     }
     const catIcons = {'Магазин':'🏪','Склад':'📦','Офіс':'🏢','Кур\'єр':'🛵'};
-    return results.map((v, i) => `
-      <div class="autosuggest-item${i === this._suggestIdx ? ' selected' : ''}"
-        onmousedown="App.selectSuggest('${v.id}','${suggestId}')"
-        onmouseenter="App._suggestIdx=${i};App.updateSuggestHighlight('${suggestId}')">
-        <div class="as-icon">${catIcons[v.category]||'📋'}</div>
-        <div class="as-info">
-          <div class="as-title">${this.highlightMatch(v.title, query)}</div>
-          <div class="as-meta"><span>📍 ${v.city}</span><span>${v.category}</span></div>
-        </div>
-        <div class="as-salary">від ${v.salary.toLocaleString('uk')} ₴</div>
-      </div>
-    `).join('');
+    for (var i = 0; i < results.length; i++) {
+      var v = results[i];
+      var currentIdx = idx;
+      html += '<div class="autosuggest-item' + (currentIdx === this._suggestIdx ? ' selected' : '') + '"' +
+        ' onmousedown="App.selectSuggest(\'' + v.id + '\',\'' + suggestId + '\')"' +
+        ' onmouseenter="App._suggestIdx=' + currentIdx + ';App.updateSuggestHighlight(\'' + suggestId + '\')">' +
+        '<div class="as-icon">' + (catIcons[v.category] || '📋') + '</div>' +
+        '<div class="as-info">' +
+          '<div class="as-title">' + this.highlightMatch(v.title, query) + '</div>' +
+          '<div class="as-meta"><span>📍 ' + v.city + ', ' + v.location + '</span></div>' +
+        '</div>' +
+        '<div class="as-salary">від ' + v.salary.toLocaleString('uk') + ' ₴</div></div>';
+      idx++;
+    }
+    return html;
   },
 
   onSearchInput(input, suggestId) {
@@ -2042,11 +2150,14 @@ const App = {
       el.innerHTML = '';
       return;
     }
+    const filterSuggests = this.buildFilterSuggestions(q);
+    this._currentFilterSuggests = filterSuggests;
     const results = this.buildSuggestResults(q);
-    el.innerHTML = this.renderSuggest(results, q, suggestId);
+    el.innerHTML = this.renderSuggest(results, q, suggestId, filterSuggests);
     el.classList.add('open');
     this._currentSuggestResults = results;
     this._currentSuggestId = suggestId;
+    this._totalSuggestItems = filterSuggests.length + results.length;
   },
 
   onSearchKeydown(e, suggestId) {
@@ -2057,10 +2168,12 @@ const App = {
       }
       return;
     }
+    const filterCount = (this._currentFilterSuggests || []).length;
     const results = this._currentSuggestResults || [];
+    const totalItems = filterCount + results.length;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      this._suggestIdx = Math.min(this._suggestIdx + 1, results.length - 1);
+      this._suggestIdx = Math.min(this._suggestIdx + 1, totalItems - 1);
       this.updateSuggestHighlight(suggestId);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -2068,8 +2181,15 @@ const App = {
       this.updateSuggestHighlight(suggestId);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (this._suggestIdx >= 0 && results[this._suggestIdx]) {
-        this.selectSuggest(results[this._suggestIdx].id, suggestId);
+      if (this._suggestIdx >= 0) {
+        if (this._suggestIdx < filterCount) {
+          this.selectFilterSuggest(this._suggestIdx, suggestId);
+        } else {
+          var vacIdx = this._suggestIdx - filterCount;
+          if (results[vacIdx]) {
+            this.selectSuggest(results[vacIdx].id, suggestId);
+          }
+        }
       } else {
         this.closeSuggest(suggestId);
         this.doFullSearch(e.target);
