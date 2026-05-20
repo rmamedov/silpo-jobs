@@ -258,6 +258,23 @@ td.actions { white-space: nowrap; }
 .toast.success { background: var(--success); }
 .toast.error { background: var(--danger); }
 
+/* ─── FILE UPLOAD ─── */
+.file-upload-area {
+  border: 2px dashed var(--border); border-radius: var(--r-md); padding: 20px;
+  text-align: center; cursor: pointer; transition: all .2s;
+}
+.file-upload-area:hover, .file-upload-area.dragover {
+  border-color: var(--brand); background: var(--brand-light);
+}
+.file-upload-empty { padding: 20px 0; color: var(--text3); }
+.file-upload-icon { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+.file-upload-empty p { font-size: .95rem; margin-bottom: 4px; }
+.file-upload-empty small { font-size: .8rem; }
+.file-upload-current { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.file-upload-current video { border-radius: 8px; max-width: 100%; }
+.file-name { font-size: .85rem; color: var(--text2); word-break: break-all; }
+.file-name small { color: var(--text3); }
+
 /* ─── LOADING ─── */
 .loading { text-align: center; padding: 60px 20px; color: var(--text3); font-size: 1rem; }
 

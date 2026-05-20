@@ -2547,7 +2547,62 @@ const App = {
     this.filters.search = val;
     this.vacPage = 1;
     clearTimeout(this._searchTimeout);
-    this._searchTimeout = setTimeout(() => this.navigate('vacancies'), 300);
+    this._searchTimeout = setTimeout(() => this.refreshResults(), 300);
+  },
+
+  refreshResults() {
+    var filtered = this.getFiltered();
+    var total = filtered.length;
+    var totalPages = Math.ceil(total / this.perPage);
+    var page = Math.min(this.vacPage, totalPages || 1);
+    var paged = filtered.slice((page - 1) * this.perPage, page * this.perPage);
+    var grid = document.querySelector('.results-grid');
+    if (grid) {
+      grid.innerHTML = paged.length ? paged.map(function(v) { return App.renderVacancyCard(v, 'fade-in'); }).join('') : '<div class="no-results"><p style="font-size:48px;margin-bottom:var(--s-4)">🔍</p><p style="font-size:var(--t-16)">За вашим запитом нічого не знайдено</p><p style="margin-top:var(--s-3)"><button class="btn btn-primary" onclick="App.resetFilters()">Скинути фільтри</button></p></div>';
+    }
+    var countEl = document.querySelector('.cat-count strong');
+    if (countEl) countEl.textContent = total;
+    var pagEl = document.querySelector('.pagination');
+    if (pagEl) {
+      if (totalPages > 1) {
+        pagEl.innerHTML = '<button ' + (page <= 1 ? 'disabled' : '') + ' onclick="App.vacPage=' + (page - 1) + ';App.refreshResults()">‹</button>' +
+          Array.from({length: totalPages}, function(_, i) { return i + 1; }).map(function(p) {
+            return '<button class="' + (p === page ? 'active' : '') + '" onclick="App.vacPage=' + p + ';App.refreshResults()">' + p + '</button>';
+          }).join('') +
+          '<button ' + (page >= totalPages ? 'disabled' : '') + ' onclick="App.vacPage=' + (page + 1) + ';App.refreshResults()">›</button>';
+      } else {
+        pagEl.innerHTML = '';
+      }
+    } else if (totalPages > 1) {
+      var resultsParent = document.querySelector('.results-grid');
+      if (resultsParent && resultsParent.parentNode) {
+        var pDiv = document.createElement('div');
+        pDiv.className = 'pagination';
+        resultsParent.parentNode.appendChild(pDiv);
+        this.refreshResults();
+      }
+    }
+    var af = this.filters;
+    var activeFilters = [];
+    if (af.search) activeFilters.push({label: '"' + af.search + '"', key: 'search'});
+    if (af.category) activeFilters.push({label: af.category, key: 'category'});
+    var afWrap = document.querySelector('.active-filters');
+    if (activeFilters.length && !afWrap) {
+      var qf = document.querySelector('.quick-filters');
+      if (qf) {
+        var d = document.createElement('div');
+        d.className = 'active-filters';
+        qf.after(d);
+        afWrap = d;
+      }
+    }
+    if (afWrap) {
+      if (activeFilters.length) {
+        afWrap.innerHTML = activeFilters.map(function(a) { return '<span class="af-pill">' + a.label + '<span class="x" onclick="App.removeFilter(\'' + a.key + '\',\'\')">&times;</span></span>'; }).join('') + '<button style="color:var(--red-600);font-size:var(--t-13);font-weight:600;cursor:pointer;background:none;border:0" onclick="App.resetFilters()">Скинути</button>';
+      } else {
+        afWrap.remove();
+      }
+    }
   },
 
   removeFilter(key, val) {

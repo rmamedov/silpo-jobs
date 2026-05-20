@@ -1,12 +1,31 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 const Vacancy = require('../models/Vacancy');
 const Application = require('../models/Application');
 const Story = require('../models/Story');
 const Settings = require('../models/Settings');
 
 const router = express.Router();
+
+// Story video upload config
+const storyStorage = multer.diskStorage({
+  destination: path.join(__dirname, '..', 'uploads', 'stories'),
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, 'story-' + unique + path.extname(file.originalname));
+  }
+});
+const storyUpload = multer({
+  storage: storyStorage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.mp4', '.webm', '.mov'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, allowed.includes(ext));
+  }
+});
 
 // ─── Dashboard ───
 router.get('/dashboard', async (req, res) => {
@@ -164,18 +183,30 @@ router.get('/stories', async (req, res) => {
   }
 });
 
-router.post('/stories', async (req, res) => {
+router.post('/stories', storyUpload.single('video'), async (req, res) => {
   try {
-    const story = await Story.create(req.body);
+    const data = { ...req.body };
+    if (req.file) {
+      data.src = 'uploads/stories/' + req.file.filename;
+    }
+    if (data.order) data.order = Number(data.order);
+    if (data.active !== undefined) data.active = data.active === 'true' || data.active === true;
+    const story = await Story.create(data);
     res.status(201).json(story);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-router.put('/stories/:id', async (req, res) => {
+router.put('/stories/:id', storyUpload.single('video'), async (req, res) => {
   try {
-    const story = await Story.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const data = { ...req.body };
+    if (req.file) {
+      data.src = 'uploads/stories/' + req.file.filename;
+    }
+    if (data.order) data.order = Number(data.order);
+    if (data.active !== undefined) data.active = data.active === 'true' || data.active === true;
+    const story = await Story.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
     if (!story) return res.status(404).json({ error: 'Not found' });
     res.json(story);
   } catch (err) {

@@ -562,6 +562,7 @@ const AdminApp = {
   openStoryForm(story = null) {
     const s = story || { src: '', name: '', role: '', ava: '', title: '', order: 0, active: true };
     const isEdit = !!story;
+    const hasVideo = !!s.src;
 
     this.openModal(`
       <div class="modal-header">
@@ -569,10 +570,20 @@ const AdminApp = {
         <button class="modal-close" onclick="AdminApp.closeModal()">✕</button>
       </div>
       <div class="modal-body">
-        <form onsubmit="AdminApp.saveStory(event, '${isEdit ? s._id : ''}')">
-          <div class="form-group"><label>Відео (шлях) *</label><input type="text" id="sSource" value="${s.src}" required placeholder="videos/story-1.mp4"></div>
+        <form id="storyForm" onsubmit="AdminApp.saveStory(event, '${isEdit ? s._id : ''}')">
+          <div class="form-group">
+            <label>Відео файл ${isEdit ? '' : '*'}</label>
+            <div class="file-upload-area" id="storyDropZone">
+              <input type="file" id="sFile" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" style="display:none" onchange="AdminApp._onStoryFileChange(this)">
+              <div id="storyUploadContent">
+                ${hasVideo ? '<div class="file-upload-current"><video src="/'+s.src+'" style="max-height:160px;border-radius:8px" muted></video><p class="file-name">'+s.src.split('/').pop()+'</p></div>' : '<div class="file-upload-empty"><span class="file-upload-icon">🎬</span><p>Натисніть або перетягніть відео</p><small>MP4, WebM, MOV — до 50 МБ</small></div>'}
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost" style="margin-top:8px" onclick="document.getElementById('sFile').click()">${hasVideo ? 'Замінити відео' : 'Обрати файл'}</button>
+            </div>
+          </div>
+          <input type="hidden" id="sSource" value="${s.src}">
           <div class="form-row">
-            <div class="form-group"><label>Ім'я *</label><input type="text" id="sName" value="${s.name}" required></div>
+            <div class="form-group"><label>Ім\'я *</label><input type="text" id="sName" value="${s.name}" required></div>
             <div class="form-group"><label>Роль *</label><input type="text" id="sRole" value="${s.role}" required></div>
           </div>
           <div class="form-row">
@@ -583,10 +594,41 @@ const AdminApp = {
           <div class="form-group"><label class="toggle-label"><input type="checkbox" id="sActive" ${s.active!==false?'checked':''}> Активна</label></div>
           <div class="form-actions">
             <button type="button" class="btn btn-ghost" onclick="AdminApp.closeModal()">Скасувати</button>
-            <button type="submit" class="btn btn-primary">${isEdit ? 'Зберегти' : 'Створити'}</button>
+            <button type="submit" class="btn btn-primary" id="storySaveBtn">${isEdit ? 'Зберегти' : 'Створити'}</button>
           </div>
         </form>
       </div>`);
+
+    // Drag & drop
+    const zone = document.getElementById('storyDropZone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('video/')) {
+        document.getElementById('sFile').files = e.dataTransfer.files;
+        this._onStoryFileChange(document.getElementById('sFile'));
+      }
+    });
+    zone.addEventListener('click', e => {
+      if (e.target === zone || e.target.closest('.file-upload-empty') || e.target.closest('.file-upload-current')) {
+        document.getElementById('sFile').click();
+      }
+    });
+  },
+
+  _onStoryFileChange(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const content = document.getElementById('storyUploadContent');
+    const url = URL.createObjectURL(file);
+    content.innerHTML = '<div class="file-upload-current"><video src="'+url+'" style="max-height:160px;border-radius:8px" muted></video><p class="file-name">'+file.name+' <small>('+Math.round(file.size/1024/1024*10)/10+' МБ)</small></p></div>';
+    // Auto-play preview on hover
+    const vid = content.querySelector('video');
+    vid.addEventListener('mouseenter', () => vid.play().catch(()=>{}));
+    vid.addEventListener('mouseleave', () => vid.pause());
   },
 
   async editStory(id) {
@@ -597,22 +639,46 @@ const AdminApp = {
 
   async saveStory(e, id) {
     e.preventDefault();
-    const body = {
-      src: document.getElementById('sSource').value,
-      name: document.getElementById('sName').value,
-      role: document.getElementById('sRole').value,
-      ava: document.getElementById('sAva').value,
-      title: document.getElementById('sTitle').value,
-      order: Number(document.getElementById('sOrder').value) || 0,
-      active: document.getElementById('sActive').checked
-    };
+    const fileInput = document.getElementById('sFile');
+    const hasNewFile = fileInput && fileInput.files[0];
+    const existingSrc = document.getElementById('sSource').value;
 
-    if (id) {
-      await this.api(`/stories/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-      this.toast('Історію оновлено', 'success');
-    } else {
-      await this.api('/stories', { method: 'POST', body: JSON.stringify(body) });
-      this.toast('Історію створено', 'success');
+    // Validate: new story must have a video
+    if (!id && !hasNewFile && !existingSrc) {
+      this.toast('Завантажте відео файл', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('storySaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Завантаження...';
+
+    const formData = new FormData();
+    formData.append('name', document.getElementById('sName').value);
+    formData.append('role', document.getElementById('sRole').value);
+    formData.append('ava', document.getElementById('sAva').value);
+    formData.append('title', document.getElementById('sTitle').value);
+    formData.append('order', Number(document.getElementById('sOrder').value) || 0);
+    formData.append('active', document.getElementById('sActive').checked);
+    if (!hasNewFile && existingSrc) {
+      formData.append('src', existingSrc);
+    }
+    if (hasNewFile) {
+      formData.append('video', fileInput.files[0]);
+    }
+
+    try {
+      const url = id ? `${API}/stories/${id}` : `${API}/stories`;
+      const method = id ? 'PUT' : 'POST';
+      const res = await fetch(url, { method, body: formData });
+      const data = await res.json();
+      if (res.ok) {
+        this.toast(id ? 'Історію оновлено' : 'Історію створено', 'success');
+      } else {
+        this.toast(data.error || 'Помилка', 'error');
+      }
+    } catch (err) {
+      this.toast('Помилка завантаження', 'error');
     }
     this.closeModal();
     this.render_stories();
