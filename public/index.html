@@ -2001,6 +2001,7 @@ const App = {
     if (!query || query.length < 2) return [];
     var q = query.toLowerCase().trim();
     var results = [];
+    // Static filter suggestions
     for (var i = 0; i < this._filterSuggestions.length; i++) {
       var fs = this._filterSuggestions[i];
       for (var k = 0; k < fs.keywords.length; k++) {
@@ -2008,6 +2009,29 @@ const App = {
           results.push(fs);
           break;
         }
+      }
+    }
+    // Dynamic city suggestions — all cities that have vacancies
+    if (!this._vacancyCities) {
+      var citySet = {};
+      for (var i = 0; i < VACANCIES.length; i++) {
+        if (VACANCIES[i].city) citySet[VACANCIES[i].city] = true;
+      }
+      this._vacancyCities = Object.keys(citySet).sort(function(a, b) { return a.localeCompare(b, 'uk'); });
+    }
+    for (var i = 0; i < this._vacancyCities.length; i++) {
+      var city = this._vacancyCities[i];
+      if (city.toLowerCase().indexOf(q) === 0) {
+        var count = 0;
+        for (var j = 0; j < VACANCIES.length; j++) {
+          if (VACANCIES[j].city === city) count++;
+        }
+        results.push({
+          label: 'Робота в місті ' + city,
+          filter: { city: city },
+          icon: '📍',
+          _cityCount: count
+        });
       }
     }
     return results.slice(0, 3);
@@ -2024,6 +2048,7 @@ const App = {
     if (fs.filter.employment) this.filters.employment = [fs.filter.employment];
     if (fs.filter.schedule) this.filters.schedule = [fs.filter.schedule];
     if (fs.filter.tag) this.filters.search = fs.filter.tag;
+    if (fs.filter.city) this.filters.cities = [fs.filter.city];
     this.vacPage = 1;
     this.navigate('vacancies');
   },
@@ -2111,7 +2136,9 @@ const App = {
           ' onmousedown="App.selectFilterSuggest(' + f + ',\'' + suggestId + '\')"' +
           ' onmouseenter="App._suggestIdx=' + currentIdx + ';App.updateSuggestHighlight(\'' + suggestId + '\')">' +
           '<div class="as-icon">' + fs.icon + '</div>' +
-          '<div class="as-info"><div class="as-title as-filter-label">' + fs.label + '</div></div>' +
+          '<div class="as-info"><div class="as-title as-filter-label">' + fs.label + '</div>' +
+          (fs._cityCount ? '<div class="as-meta">' + fs._cityCount + ' вакансі' + (fs._cityCount === 1 ? 'я' : fs._cityCount < 5 ? 'ї' : 'й') + '</div>' : '') +
+          '</div>' +
           '<div class="as-arrow">→</div></div>';
         idx++;
       }
